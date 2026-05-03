@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="neo_pink">#FF3399</color>
+    <color name="neo_yellow">#FFD600</color>
+    <color name="neo_bg">#FFF9E7</color>
+    <color name="neo_black">#000000</color>
+    <color name="neo_white">#FFFFFF</color>
+
+    <color name="bg_light">#F9FAFB</color>
+    <color name="primary_blue">#3B82F6</color>
+    <color name="primary_green">#10B981</color>
+    <color name="primary_purple">#A855F7</color>
+    <color name="text_dark">#111827</color>
+    <color name="text_muted">#6B7280</color>
+    <color name="card_bg">#FFFFFF</color>
+    <color name="icon_bg_blue">#EFF6FF</color>
+    <color name="icon_bg_green">#ECFDF5</color>
+    <color name="icon_bg_purple">#FAF5FF</color>
+</resources>
