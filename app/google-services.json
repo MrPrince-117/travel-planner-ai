@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "624457453685",
+    "project_id": "travel-planner-ai-88c19",
+    "storage_bucket": "travel-planner-ai-88c19.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:624457453685:android:bec17ba9d2c17f14aae83c",
+        "android_client_info": {
+          "package_name": "com.example.travelplannerai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuv4av0FrgaeSOD2ndqlWrUj5SJkyhis8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
