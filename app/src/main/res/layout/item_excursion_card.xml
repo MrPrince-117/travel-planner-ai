@@ -1,8 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- item_excursion_card.xml -->
+<!-- DESCRIPCIÓN: Card con diseño Neo-Brutalist para mostrar las excursiones de un viaje, con bordes marcados, iconos de tiempo y botón de eliminar. -->
+
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/white"
+    app:strokeColor="@color/neo_black"
+    app:strokeWidth="2dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Icono de Actividad Circular -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivExcursionIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_gallery"
+            android:background="@color/neo_yellow"
+            android:padding="6dp"
+            app:shapeAppearanceOverlay="@style/CircleAppearance"
+            app:strokeColor="@color/neo_black"
+            app:strokeWidth="1.5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="Icono de actividad" />
+
+        <!-- Título de la Excursión -->
+        <TextView
+            android:id="@+id/tvExcursionTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:text="Visita al Museo del Louvre"
+            android:textColor="@color/neo_black"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-black"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@id/ivExcursionIcon"
+            app:layout_constraintEnd_toStartOf="@id/ibDeleteExcursion"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Fila de Info (Fecha/Hora y Duración) -->
+        <LinearLayout
+            android:id="@+id/layoutExcursionInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="@id/tvExcursionTitle"
+            app:layout_constraintEnd_toStartOf="@id/ibDeleteExcursion"
+            app:layout_constraintTop_toBottomOf="@id/tvExcursionTitle">
+
+            <!-- Reloj/Fecha Icono -->
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@android:drawable/ic_menu_recent_history"
+                app:tint="@color/text_muted"
+                android:contentDescription="Icono de hora" />
+
+            <!-- Texto de Fecha y Hora -->
+            <TextView
+                android:id="@+id/tvExcursionDateTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="18 Oct, 10:00 AM"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <!-- Separador Bullet -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="6dp"
+                android:text="•"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp" />
+
+            <!-- Texto de Duración -->
+            <TextView
+                android:id="@+id/tvExcursionDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3 hrs"
+                android:textColor="@color/primary_blue"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-bold"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Botón de Eliminar Excursión -->
+        <ImageButton
+            android:id="@+id/ibDeleteExcursion"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/neo_circle_btn_bg"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="#EF4444"
+            android:padding="10dp"
+            android:scaleType="centerInside"
+            android:contentDescription="Eliminar excursión"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

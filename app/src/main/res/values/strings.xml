@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Travel Planner AI</string>
+    <string name="itinerary_generating">Generando itinerario inteligente…</string>
+    <string name="itinerary_error">No se pudo generar el itinerario. Inténtalo más tarde.</string>
+    <string name="budget_not_available">N/A</string>
+    <string name="error_loading_details">Error al cargar detalles</string>
 </resources>

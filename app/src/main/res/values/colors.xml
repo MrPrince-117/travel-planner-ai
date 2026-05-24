@@ -19,4 +19,8 @@
     <color name="icon_bg_blue">#EFF6FF</color>
     <color name="icon_bg_green">#ECFDF5</color>
     <color name="icon_bg_purple">#FAF5FF</color>
+
+    <!-- Project Primary and Secondary Colors (Neo Style) -->
+    <color name="primary">@color/neo_pink</color>
+    <color name="secondary">@color/neo_yellow</color>
 </resources>

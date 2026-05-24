@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/neo_bg"
@@ -9,13 +10,32 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="60dp" />
+            android:layout_height="40dp" />
 
-        <!-- Logo / Título -->
+        <!-- Logo en tarjeta Neo-Brutalista -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardBackgroundColor="@color/neo_yellow"
+            app:strokeColor="@color/neo_black"
+            app:strokeWidth="2dp"
+            app:cardElevation="0dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_launcher_foreground"
+                android:padding="8dp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Título principal -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
@@ -24,72 +44,102 @@
             android:textColor="@color/neo_black"
             android:textSize="32sp"
             android:fontFamily="sans-serif-black"
-            android:textStyle="bold" />
-
-        <!-- Subtítulo -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Planifica tus viajes con IA"
-            android:textColor="@color/neo_black"
-            android:textSize="16sp"
-            android:layout_marginBottom="48dp" />
-
-        <!-- Email Label -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EMAIL"
-            android:textColor="@color/neo_black"
-            android:textSize="12sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:layout_marginBottom="4dp" />
 
-        <!-- Email EditText -->
-        <EditText
-            android:id="@+id/etLoginEmail"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:hint="tu@email.com"
-            android:inputType="textEmailAddress"
-            android:background="@drawable/neo_edittext_bg"
-            android:textColor="@color/neo_black"
-            android:textColorHint="#9E9E9E"
-            android:layout_marginBottom="24dp" />
-
-        <!-- Password Label -->
+        <!-- Mensaje Inspirador -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CONTRASEÑA"
-            android:textColor="@color/neo_black"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp" />
+            android:text="¡Tu próxima gran aventura empieza con un solo clic!"
+            android:textColor="@color/text_dark"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="32dp"
+            android:gravity="center" />
 
-        <!-- Password EditText -->
-        <EditText
-            android:id="@+id/etLoginPassword"
+        <!-- Email TextInputLayout -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilEmail"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:hint="••••••••"
-            android:inputType="textPassword"
-            android:background="@drawable/neo_edittext_bg"
-            android:textColor="@color/neo_black"
-            android:textColorHint="#9E9E9E"
-            android:layout_marginBottom="32dp" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Email"
+            app:boxStrokeColor="@color/neo_black"
+            app:hintTextColor="@color/text_dark"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:startIconDrawable="@android:drawable/ic_dialog_email"
+            app:startIconTint="@color/neo_black">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etLoginEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/neo_black"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Password TextInputLayout -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilPassword"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:hint="Contraseña"
+            app:boxStrokeColor="@color/neo_black"
+            app:hintTextColor="@color/text_dark"
+            app:boxStrokeWidth="2dp"
+            app:boxStrokeWidthFocused="3dp"
+            app:boxCornerRadiusTopStart="16dp"
+            app:boxCornerRadiusTopEnd="16dp"
+            app:boxCornerRadiusBottomStart="16dp"
+            app:boxCornerRadiusBottomEnd="16dp"
+            app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+            app:startIconTint="@color/neo_black"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/neo_black">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etLoginPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="@color/neo_black"
+                android:textSize="16sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBarLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:indeterminateTint="@color/neo_pink"
+            android:visibility="gone" />
 
         <!-- Login Button -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogin"
+            style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="56dp"
             android:text="INICIAR SESIÓN"
             android:textColor="@color/white"
             android:textSize="16sp"
+            android:fontFamily="sans-serif-black"
             android:textStyle="bold"
-            android:backgroundTint="@color/neo_pink"
-            android:background="@drawable/neo_button_bg"
+            app:backgroundTint="@color/neo_pink"
+            app:strokeColor="@color/neo_black"
+            app:strokeWidth="2dp"
+            app:cornerRadius="16dp"
             android:stateListAnimator="@null"
             android:layout_marginBottom="24dp" />
 
@@ -98,9 +148,10 @@
             android:id="@+id/tvGoToRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:text="¿No tienes cuenta? Regístrate aquí"
             android:textColor="@color/neo_pink"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-bold"
             android:textStyle="bold"
             android:padding="8dp" />
 

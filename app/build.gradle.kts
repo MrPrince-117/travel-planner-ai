@@ -1,13 +1,12 @@
 
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.google.services)
 }
 
 android {
     namespace = "com.example.travelplannerai"
     compileSdk = 34
-
-
 
     defaultConfig {
         applicationId = "com.example.travelplannerai"
@@ -18,6 +17,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"AIzaSyA61_UUChoMt27xDmg4U9HRZUJ8lMV3WVs\"")
     }
 
     buildTypes {
@@ -34,6 +35,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -47,8 +51,20 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // Firebase BOM - Corregido con paréntesis y comillas dobles
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+
+    // Navigation
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+
+    // REST Client
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Gemini AI SDK (Mantener por si otras partes lo usan, pero migraremos a REST)
+    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+    implementation("com.google.guava:guava:31.1-android")
 }

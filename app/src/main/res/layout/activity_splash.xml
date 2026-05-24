@@ -1,8 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- activity_splash.xml -->
+<!-- DESCRIPCIÓN: Pantalla de inicio de la aplicación (Splash Screen) con estilo Neo-Brutalist, logo centrado, tipografía pesada y barra de progreso. -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/neo_bg">
+
+    <!-- Contenedor del Logo y Títulos (Centrado en pantalla) -->
+    <LinearLayout
+        android:id="@+id/layoutSplashContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginHorizontal="24dp">
+
+        <!-- Logo de la Aplicación -->
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivSplashLogo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:background="@color/neo_pink"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            app:shapeAppearanceOverlay="@style/Rounded12dp"
+            app:strokeColor="@color/neo_black"
+            app:strokeWidth="3dp"
+            android:contentDescription="Logotipo de Travel Planner AI"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Título de la App -->
+        <TextView
+            android:id="@+id/tvSplashTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Travel Planner AI"
+            android:textColor="@color/neo_black"
+            android:textSize="28sp"
+            android:fontFamily="sans-serif-black"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Subtítulo -->
+        <TextView
+            android:id="@+id/tvSplashSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Planifica tu próximo viaje con IA"
+            android:textColor="@color/neo_black"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium" />
+
+    </LinearLayout>
+
+    <!-- ProgressBar en la parte inferior -->
+    <ProgressBar
+        android:id="@+id/pbSplashLoading"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/neo_pink"
+        android:layout_marginBottom="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
