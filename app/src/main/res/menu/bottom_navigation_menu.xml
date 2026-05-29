@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@android:drawable/ic_menu_today"
+        android:title="Inicio" />
+
+    <item
+        android:id="@+id/myTripsFragment"
+        android:icon="@android:drawable/ic_menu_mapmode"
+        android:title="Mis Viajes" />
+
+    <item
+        android:id="@+id/placesSearchFragment"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="Explorar" />
+
+    <item
+        android:id="@+id/favoritesFragment"
+        android:icon="@drawable/ic_heart_filled"
+        android:title="Favoritos" />
+
+    <item
+        android:id="@+id/chatFragment"
+        android:icon="@android:drawable/stat_notify_chat"
+        android:title="IA Chat" />
+
+</menu>

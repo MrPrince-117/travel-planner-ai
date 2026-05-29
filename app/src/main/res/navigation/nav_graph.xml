@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.travelplannerai.ui.main.HomeFragment"
+        android:label="Inicio"
+        tools:layout="@layout/fragment_home">
+        <action android:id="@+id/action_homeFragment_to_createTripFragment"
+            app:destination="@id/createTripFragment" />
+        <action android:id="@+id/action_homeFragment_to_myTripsFragment"
+            app:destination="@id/myTripsFragment" />
+        <action android:id="@+id/action_homeFragment_to_tripDetailFragment"
+            app:destination="@id/tripDetailFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="false" />
+        <action android:id="@+id/action_homeFragment_to_chatFragment"
+            app:destination="@id/chatFragment" />
+        <action android:id="@+id/action_homeFragment_to_configurationFragment"
+            app:destination="@id/configurationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createTripFragment"
+        android:name="com.example.travelplannerai.ui.main.CreateTripFragment"
+        android:label="Crear Viaje"
+        tools:layout="@layout/fragment_create_trip">
+        <action android:id="@+id/action_createTripFragment_to_myTripsFragment"
+            app:destination="@id/myTripsFragment"
+            app:popUpTo="@id/homeFragment" />
+        <action android:id="@+id/action_createTripFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/myTripsFragment"
+        android:name="com.example.travelplannerai.ui.main.MyTripsFragment"
+        android:label="Mis Viajes"
+        tools:layout="@layout/fragment_my_trips">
+        <action android:id="@+id/action_myTripsFragment_to_tripDetailFragment"
+            app:destination="@id/tripDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tripDetailFragment"
+        android:name="com.example.travelplannerai.ui.main.TripDetailFragment"
+        android:label="Detalle del Viaje"
+        tools:layout="@layout/fragment_trip_detail">
+        <argument android:name="tripId" app:argType="string" />
+        <action android:id="@+id/action_tripDetailFragment_to_editTripFragment"
+            app:destination="@id/editTripFragment" />
+        <action android:id="@+id/action_tripDetailFragment_to_createExcursionFragment"
+            app:destination="@id/createExcursionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editTripFragment"
+        android:name="com.example.travelplannerai.ui.main.EditTripFragment"
+        android:label="Editar Viaje"
+        tools:layout="@layout/fragment_edit_trip">
+        <argument android:name="tripId" app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createExcursionFragment"
+        android:name="com.example.travelplannerai.ui.main.CreateExcursionFragment"
+        android:label="Añadir Excursión"
+        tools:layout="@layout/activity_create_excursion">
+        <argument android:name="tripId" app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/placesSearchFragment"
+        android:name="com.example.travelplannerai.ui.main.PlacesSearchFragment"
+        android:label="Explorar Lugares"
+        tools:layout="@layout/fragment_places_search" />
+
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.example.travelplannerai.ui.main.FavoritesFragment"
+        android:label="Favoritos"
+        tools:layout="@layout/fragment_favorites">
+        <action android:id="@+id/action_favoritesFragment_to_tripDetailFragment"
+            app:destination="@id/tripDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.example.travelplannerai.ui.chat.ChatFragment"
+        android:label="Asistente IA"
+        tools:layout="@layout/fragment_ai_chat" />
+
+    <fragment
+        android:id="@+id/configurationFragment"
+        android:name="com.example.travelplannerai.ui.auth.ConfigurationFragment"
+        android:label="Ajustes"
+        tools:layout="@layout/fragment_configuration" />
+
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.travelplannerai.ui.map.MapFragment"
+        android:label="Mapa"
+        tools:layout="@layout/fragment_map" />
+
+</navigation>
