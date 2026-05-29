@@ -3,30 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="end"
-    android:paddingVertical="6dp"
-    android:paddingHorizontal="4dp">
+    android:padding="8dp"
+    android:gravity="end">
 
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:layout_marginStart="64dp"
-        app:cardCornerRadius="16dp"
-        app:cardBackgroundColor="@color/neo_pink"
-        app:strokeColor="@color/neo_black"
-        app:strokeWidth="2dp"
-        app:cardElevation="0dp">
+        app:cardBackgroundColor="@color/primary_blue"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp">
 
         <TextView
             android:id="@+id/tvUserMessage"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="12dp"
-            android:text="Hola, ¿me recomiendas sitios en París?"
+            android:padding="12dp"
             android:textColor="@color/white"
             android:textSize="15sp"
-            android:fontFamily="sans-serif-medium" />
+            android:text="Mensaje del usuario"/>
+
     </com.google.android.material.card.MaterialCardView>
+
 </LinearLayout>

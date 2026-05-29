@@ -1,6 +1,9 @@
 package com.example.travelplannerai.data.model;
 
 import com.google.firebase.firestore.DocumentId;
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
 
 /**
  * Modelo POJO que representa un Viaje.
@@ -11,7 +14,11 @@ public class Trip {
     private String destination; // Destino del viaje (e.g. "París, Francia")
     private String dates;       // Fechas del viaje (e.g. "15-22 Abr")
     private String imageUrl;    // Imagen representativa del viaje
-    private Double budget;      // Cambiado a Double para evitar crash de deserialización
+    private Double budget;      // Presupuesto del viaje
+    private String userId;      // ID del usuario creador (Añadido para corregir CustomClassMapper)
+
+    @ServerTimestamp
+    private Date createdAt;   // Fecha de creación en el servidor (Añadido para corregir CustomClassMapper)
     
     // Campos auxiliares heredados para la sección de actividad reciente
     private String title;       
@@ -133,5 +140,21 @@ public class Trip {
 
     public void setActivity(boolean activity) {
         isActivity = activity;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Date getCreatedAt() {  // ✅ Date, no Object
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {  // ✅ Date, no Object
+        this.createdAt = createdAt;
     }
 }

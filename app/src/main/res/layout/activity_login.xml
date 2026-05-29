@@ -92,7 +92,7 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="8dp"
             android:hint="Contraseña"
             app:boxStrokeColor="@color/neo_black"
             app:hintTextColor="@color/text_dark"
@@ -115,6 +115,19 @@
                 android:textColor="@color/neo_black"
                 android:textSize="16sp" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- ¿Olvidaste tu contraseña? -->
+        <TextView
+            android:id="@+id/tvForgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginBottom="24dp"
+            android:text="¿Olvidaste tu contraseña?"
+            android:textColor="@color/neo_pink"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-medium"
+            android:padding="4dp" />
 
         <!-- Progress Bar -->
         <ProgressBar

@@ -15,10 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelplannerai.R;
+import com.example.travelplannerai.data.firebase.FirebaseAuthManager;
+import com.example.travelplannerai.data.firebase.FirebaseFirestoreManager;
 import com.example.travelplannerai.data.model.Trip;
-import com.example.travelplannerai.data.repository.TripRepository;
 import com.example.travelplannerai.ui.adapters.ActivityAdapter;
 import com.example.travelplannerai.ui.adapters.TripAdapter;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -75,23 +77,44 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
     }
 
     private void loadTripsFromFirestore() {
-        TripRepository.getInstance().getTrips(task -> {
-            if (task.isSuccessful() && task.getResult() != null) {
-                List<Trip> upcomingTrips = new ArrayList<>();
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    Trip trip = document.toObject(Trip.class);
-                    upcomingTrips.add(trip);
-                }
+        String userId = FirebaseAuthManager.getInstance().getCurrentUserId();
 
-                if (upcomingTrips.isEmpty()) {
-                    upcomingTrips = getMockUpcomingTrips();
-                }
-                setupUpcomingTripsRecyclerView(upcomingTrips);
+        Log.d(TAG, "📥 Cargando viajes del usuario: " + userId);
 
-            } else {
-                setupUpcomingTripsRecyclerView(getMockUpcomingTrips());
-            }
-        });
+        if (userId == null) {
+            Log.e(TAG, "❌ userId es NULL");
+            setupUpcomingTripsRecyclerView(new ArrayList<>());
+            return;
+        }
+
+        // ✅ USAR FirebaseFirestoreManager DIRECTAMENTE para filtrar por userId
+        FirebaseFirestoreManager.getInstance().getUserTrips(userId)
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Trip> upcomingTrips = new ArrayList<>();
+
+                    if (querySnapshot != null && !querySnapshot.isEmpty()) {
+                        for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                            Trip trip = document.toObject(Trip.class);
+                            if (trip != null) {
+                                // ✅ ASEGURAR QUE TIENE EL ID
+                                if (trip.getId() == null || trip.getId().isEmpty()) {
+                                    trip.setId(document.getId());
+                                }
+                                Log.d(TAG, "✅ Trip cargado: " + trip.getDestination() + " (ID: " + trip.getId() + ")");
+                                upcomingTrips.add(trip);
+                            }
+                        }
+                        Log.d(TAG, "✅ Total de viajes cargados: " + upcomingTrips.size());
+                    } else {
+                        Log.d(TAG, "⚠️ No hay viajes para este usuario");
+                    }
+
+                    setupUpcomingTripsRecyclerView(upcomingTrips);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ Error cargando viajes: " + e.getMessage());
+                    setupUpcomingTripsRecyclerView(new ArrayList<>());
+                });
     }
 
     private void setupUpcomingTripsRecyclerView(List<Trip> trips) {
@@ -111,14 +134,6 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
         rvRecentActivity.setAdapter(activityAdapter);
     }
 
-    private List<Trip> getMockUpcomingTrips() {
-        List<Trip> mockList = new ArrayList<>();
-        // Corregido: Usar IDs de tipo int para coincidir con el constructor Trip(int, String, String, String)
-        mockList.add(new Trip(101, "París, Francia", "15-22 Abr", "https://images.unsplash.com/photo-1642947392578-b37fbd9a4d45?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxQYXJpcyUyMEVpZmZlbCUyMFRvd2VyJTIwc3Vuc2V0fGVufDF8fHx8MTc3NTQ2Njk2Mnww&ixlib=rb-4.1.0&q=80&w=1080"));
-        mockList.add(new Trip(102, "Tokio, Japón", "10-18 May", "https://images.unsplash.com/photo-1648871647634-0c99b483cb63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxUb2t5byUyMHNreWxpbmUlMjBuaWdodHxlbnwxfHx8fDE3NzU0NjY5NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080"));
-        return mockList;
-    }
-
     @Override
     public void onDeleteClick(Trip trip) {
         // En Home quizás no queremos borrar directamente, o podemos redirigir a MyTrips
@@ -127,6 +142,19 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
 
     @Override
     public void onTripClick(Trip trip) {
-        Toast.makeText(getContext(), "Detalles de " + trip.getDestination(), Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "🔍 onTripClick llamado");
+        Log.d(TAG, "🔍 Trip: " + (trip != null ? trip.getDestination() : "NULL"));
+        Log.d(TAG, "🔍 Trip ID (raw): " + (trip != null ? trip.getId() : "NULL"));
+
+        if (trip != null && trip.getId() != null && !trip.getId().isEmpty()) {
+            Bundle args = new Bundle();
+            args.putString("tripId", trip.getId());
+            Log.d(TAG, "✅ Navegando a TripDetail con ID: " + trip.getId());
+            Navigation.findNavController(requireView())
+                    .navigate(R.id.action_homeFragment_to_tripDetailFragment, args);
+        } else {
+            Log.e(TAG, "❌ Trip o ID es NULL");
+            Toast.makeText(getContext(), "Error: Viaje sin ID", Toast.LENGTH_SHORT).show();
+        }
     }
 }

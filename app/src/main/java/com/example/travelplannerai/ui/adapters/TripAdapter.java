@@ -1,5 +1,6 @@
 package com.example.travelplannerai.ui.adapters;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.travelplannerai.R;
 import com.example.travelplannerai.data.model.Trip;
+
 import com.bumptech.glide.Glide;
 
 import java.util.List;
@@ -41,11 +43,10 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder
     @Override
     public void onBindViewHolder(@NonNull TripViewHolder holder, int position) {
         Trip trip = trips.get(position);
-        
+
         holder.tvDestination.setText(trip.getDestination());
         holder.tvDates.setText(trip.getDates());
-        
-        // Corregido: budget es de tipo Double, se elimina el check .isEmpty() que causaba el error de compilación.
+
         if (trip.getBudget() != null) {
             holder.tvBudget.setText("Presupuesto: " + trip.getBudget() + "€");
             holder.tvBudget.setVisibility(View.VISIBLE);
@@ -63,17 +64,17 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder
             holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
+        // ✅ CONVERTIR ID A STRING
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onTripClick(trip);
+            }
+        });
+
         // Listener para borrar
         holder.btnDelete.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onDeleteClick(trip);
-            }
-        });
-
-        // Listener para clic en la tarjeta (opcional)
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onTripClick(trip);
             }
         });
     }

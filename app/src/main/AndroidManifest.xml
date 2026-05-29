@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TravelPlannerAI">
+
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
@@ -29,6 +34,15 @@
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
+<!--        <activity-->
+<!--            android:name=".ui.main.TripDetailActivity"-->
+<!--            android:exported="false"-->
+<!--            android:label="Detalle del Viaje" />-->
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBL5dwUv7nf8HHGIXR8113rNwzZlgWdQ9A" />
     </application>
 
 </manifest>
