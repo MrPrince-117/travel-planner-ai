@@ -5,156 +5,263 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.travelplannerai.R;
 import com.example.travelplannerai.data.firebase.FirebaseAuthManager;
 import com.example.travelplannerai.data.firebase.FirebaseFirestoreManager;
 import com.example.travelplannerai.data.model.Trip;
-import com.example.travelplannerai.ui.adapters.ActivityAdapter;
 import com.example.travelplannerai.ui.adapters.TripAdapter;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * fragment_home: La pantalla principal de la aplicación.
- */
 public class HomeFragment extends Fragment implements TripAdapter.OnTripActionListener {
 
     private static final String TAG = "HomeFragment";
 
+    // Vistas
     private RecyclerView rvUpcomingTrips;
-    private RecyclerView rvRecentActivity;
-    private TripAdapter tripAdapter;
-    private ActivityAdapter activityAdapter;
+    private TripAdapter  tripAdapter;
+
+    // Stats
+    private TextView tvStatsTrips, tvStatsFavorites, tvStatsExcursions;
+
+    // Próximo viaje
+    private CardView    cardNextTrip;
+    private LinearLayout layoutNoNextTrip;
+    private ImageView   ivNextTripImage;
+    private TextView    tvNextTripDestination, tvNextTripDays,
+            tvNextTripDates, tvNextTripBudget, tvNextTripTotalBudget;
+
+    private String nextTripId; // para navegar al pulsar la card
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedBundleState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // Inicializar vistas
+        // Recycler
         rvUpcomingTrips = view.findViewById(R.id.rvUpcomingTrips);
-        rvRecentActivity = view.findViewById(R.id.rvRecentActivity);
+
+        // Stats
+        tvStatsTrips      = view.findViewById(R.id.tvStatsTrips);
+        tvStatsFavorites  = view.findViewById(R.id.tvStatsFavorites);
+        tvStatsExcursions = view.findViewById(R.id.tvStatsExcursions);
+
+        // Próximo viaje
+        cardNextTrip           = view.findViewById(R.id.cardNextTrip);
+        layoutNoNextTrip       = view.findViewById(R.id.layoutNoNextTrip);
+        ivNextTripImage        = view.findViewById(R.id.ivNextTripImage);
+        tvNextTripDestination  = view.findViewById(R.id.tvNextTripDestination);
+        tvNextTripDays         = view.findViewById(R.id.tvNextTripDays);
+        tvNextTripDates        = view.findViewById(R.id.tvNextTripDates);
+        tvNextTripBudget       = view.findViewById(R.id.tvNextTripBudget);
+        tvNextTripTotalBudget  = view.findViewById(R.id.tvNextTripTotalBudget);
+
+        // Listeners de navegación
+        view.findViewById(R.id.tvViewAllTrips).setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_homeFragment_to_myTripsFragment));
+
+        view.findViewById(R.id.btnQuickCreate).setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_homeFragment_to_createTripFragment));
+
+        view.findViewById(R.id.btnQuickSearch).setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_homeFragment_to_placesSearchFragment));
+
+        view.findViewById(R.id.layoutSearchBar).setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_homeFragment_to_placesSearchFragment));
+
+        view.findViewById(R.id.btnQuickChat).setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_homeFragment_to_chatFragment));
+
+        // Pulsar card próximo viaje → detalle
+        cardNextTrip.setOnClickListener(v -> {
+            if (nextTripId != null) {
+                Bundle args = new Bundle();
+                args.putString("tripId", nextTripId);
+                Navigation.findNavController(requireView())
+                        .navigate(R.id.action_homeFragment_to_tripDetailFragment, args);
+            }
+        });
 
         // Cargar datos
-        setupData();
-
-        // Navegación: Ver todos los viajes
-        view.findViewById(R.id.tvViewAllTrips).setOnClickListener(v -> {
-            Navigation.findNavController(v)
-                    .navigate(R.id.action_homeFragment_to_myTripsFragment);
-        });
-
-        // Navegar a CreateTripFragment
-        view.findViewById(R.id.btnQuickCreate).setOnClickListener(v -> {
-            Navigation.findNavController(v)
-                    .navigate(R.id.action_homeFragment_to_createTripFragment);
-        });
-
-        // Navegar a ChatFragment
-        view.findViewById(R.id.btnQuickChat).setOnClickListener(v -> {
-            Navigation.findNavController(v)
-                    .navigate(R.id.action_homeFragment_to_chatFragment);
-        });
+        loadData();
 
         return view;
     }
 
-    private void setupData() {
-        loadTripsFromFirestore();
-        setupRecentActivities();
+    private void loadData() {
+        String userId = FirebaseAuthManager.getInstance().getCurrentUserId();
+        if (userId == null) return;
+
+        loadTrips(userId);
+        loadStats(userId);
     }
 
-    private void loadTripsFromFirestore() {
-        String userId = FirebaseAuthManager.getInstance().getCurrentUserId();
+    // ==================== VIAJES ====================
 
+    private void loadTrips(String userId) {
         Log.d(TAG, "📥 Cargando viajes del usuario: " + userId);
 
-        if (userId == null) {
-            Log.e(TAG, "❌ userId es NULL");
-            setupUpcomingTripsRecyclerView(new ArrayList<>());
-            return;
-        }
-
-        // ✅ USAR FirebaseFirestoreManager DIRECTAMENTE para filtrar por userId
         FirebaseFirestoreManager.getInstance().getUserTrips(userId)
                 .addOnSuccessListener(querySnapshot -> {
-                    List<Trip> upcomingTrips = new ArrayList<>();
-
-                    if (querySnapshot != null && !querySnapshot.isEmpty()) {
-                        for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-                            Trip trip = document.toObject(Trip.class);
+                    List<Trip> trips = new ArrayList<>();
+                    if (querySnapshot != null) {
+                        for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                            Trip trip = doc.toObject(Trip.class);
                             if (trip != null) {
-                                // ✅ ASEGURAR QUE TIENE EL ID
-                                if (trip.getId() == null || trip.getId().isEmpty()) {
-                                    trip.setId(document.getId());
-                                }
-                                Log.d(TAG, "✅ Trip cargado: " + trip.getDestination() + " (ID: " + trip.getId() + ")");
-                                upcomingTrips.add(trip);
+                                if (trip.getId() == null || trip.getId().isEmpty())
+                                    trip.setId(doc.getId());
+                                trips.add(trip);
                             }
                         }
-                        Log.d(TAG, "✅ Total de viajes cargados: " + upcomingTrips.size());
-                    } else {
-                        Log.d(TAG, "⚠️ No hay viajes para este usuario");
+                        Log.d(TAG, "✅ Total de viajes cargados: " + trips.size());
                     }
 
-                    setupUpcomingTripsRecyclerView(upcomingTrips);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (!isAdded()) return;
+                            setupTripsRecycler(trips);
+                            setupNextTrip(trips);
+                        });
+                    }
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "❌ Error cargando viajes: " + e.getMessage());
-                    setupUpcomingTripsRecyclerView(new ArrayList<>());
-                });
+                .addOnFailureListener(e ->
+                        Log.e(TAG, "❌ Error cargando viajes: " + e.getMessage()));
     }
 
-    private void setupUpcomingTripsRecyclerView(List<Trip> trips) {
-        // Pasamos 'this' como listener del adaptador
+    private void setupTripsRecycler(List<Trip> trips) {
         tripAdapter = new TripAdapter(trips, this);
-        rvUpcomingTrips.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvUpcomingTrips.setLayoutManager(
+                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvUpcomingTrips.setAdapter(tripAdapter);
     }
 
-    private void setupRecentActivities() {
-        List<Trip> recentActivities = new ArrayList<>();
-        recentActivities.add(new Trip(1, "Ruta Gastronómica Roma", "Plan generado por IA", "Hace 2 días", "https://images.unsplash.com/photo-1552832230-c0197dd311b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxSb21lJTIwQ29saXNzZXVtfGVufDF8fHx8MTc3NTQ2Njk2M3ww&ixlib=rb-4.1.0&q=80&w=1080", true));
-        recentActivities.add(new Trip(2, "Hoteles en Kioto", "Búsqueda guardada", "Hace 5 días", "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxLeW90byUyMHRlbXBsZXxlbnwxfHx8fDE3NzU0NjY5NjN8MA&ixlib=rb-4.1.0&q=80&w=1080", true));
+    // ==================== PRÓXIMO VIAJE ====================
 
-        activityAdapter = new ActivityAdapter(recentActivities);
-        rvRecentActivity.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvRecentActivity.setAdapter(activityAdapter);
+    private void setupNextTrip(List<Trip> trips) {
+        if (trips.isEmpty()) {
+            cardNextTrip.setVisibility(View.GONE);
+            layoutNoNextTrip.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        // Tomar el primer viaje de la lista como "próximo"
+        Trip next = trips.get(0);
+        nextTripId = next.getId();
+
+        cardNextTrip.setVisibility(View.VISIBLE);
+        layoutNoNextTrip.setVisibility(View.GONE);
+
+        // Destino
+        tvNextTripDestination.setText(next.getDestination());
+
+        // Fechas
+        tvNextTripDates.setText(next.getDates() != null && !next.getDates().isEmpty()
+                ? next.getDates() : "Sin fechas");
+
+        // Presupuesto
+        tvNextTripBudget.setText(next.getBudget() != null && next.getBudget() > 0
+                ? next.getBudget().intValue() + "€" : "No definido");
+
+        // Días restantes (placeholder visual — sin parseo de fecha complejo)
+        tvNextTripDays.setText("📅");
+
+        // Imagen
+        if (next.getImageUrl() != null && !next.getImageUrl().isEmpty()) {
+            Glide.with(this)
+                    .load(next.getImageUrl())
+                    .centerCrop()
+                    .into(ivNextTripImage);
+        }
+
+        // Presupuesto total de todos los viajes
+        loadTotalBudget(trips);
     }
+
+    // ==================== ESTADÍSTICAS ====================
+
+    private void loadStats(String userId) {
+        // Viajes + presupuesto total (tarjeta verde)
+        FirebaseFirestoreManager.getInstance().getUserTrips(userId)
+                .addOnSuccessListener(snap -> {
+                    if (!isAdded()) return;
+                    int count = snap != null ? snap.size() : 0;
+                    tvStatsTrips.setText(String.valueOf(count));
+
+                    // Sumar presupuestos para la tarjeta verde
+                    if (snap != null) {
+                        double total = 0;
+                        for (DocumentSnapshot doc : snap.getDocuments()) {
+                            Trip t = doc.toObject(Trip.class);
+                            if (t != null && t.getBudget() != null && t.getBudget() > 0)
+                                total += t.getBudget();
+                        }
+                        final String label = total >= 1000
+                                ? String.format("%.1fK€", total / 1000)
+                                : (int) total + "€";
+                        tvStatsExcursions.setText(label);
+                    }
+                });
+
+        // Favoritos
+        FirebaseFirestoreManager.getInstance().getUserFavorites(userId)
+                .addOnSuccessListener(snap -> {
+                    if (!isAdded()) return;
+                    tvStatsFavorites.setText(snap != null ? String.valueOf(snap.size()) : "0");
+                });
+    }
+
+    private void loadTotalBudget(List<Trip> trips) {
+        double total = 0;
+        for (Trip t : trips) {
+            if (t.getBudget() != null && t.getBudget() > 0) {
+                total += t.getBudget();
+            }
+        }
+        final String label = total > 0
+                ? (total >= 1000
+                ? String.format("%.1fK€", total / 1000)
+                : (int) total + "€")
+                : "0€";
+        tvNextTripTotalBudget.setText(label);
+    }
+
+    // ==================== LISTENERS ADAPTER ====================
 
     @Override
     public void onDeleteClick(Trip trip) {
-        // En Home quizás no queremos borrar directamente, o podemos redirigir a MyTrips
-        Toast.makeText(getContext(), "Usa 'Ver todos' para gestionar tus viajes", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(),
+                "Usa 'Ver todos' para gestionar tus viajes", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onTripClick(Trip trip) {
-        Log.d(TAG, "🔍 onTripClick llamado");
-        Log.d(TAG, "🔍 Trip: " + (trip != null ? trip.getDestination() : "NULL"));
-        Log.d(TAG, "🔍 Trip ID (raw): " + (trip != null ? trip.getId() : "NULL"));
-
         if (trip != null && trip.getId() != null && !trip.getId().isEmpty()) {
             Bundle args = new Bundle();
             args.putString("tripId", trip.getId());
-            Log.d(TAG, "✅ Navegando a TripDetail con ID: " + trip.getId());
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_homeFragment_to_tripDetailFragment, args);
-        } else {
-            Log.e(TAG, "❌ Trip o ID es NULL");
-            Toast.makeText(getContext(), "Error: Viaje sin ID", Toast.LENGTH_SHORT).show();
         }
     }
 }

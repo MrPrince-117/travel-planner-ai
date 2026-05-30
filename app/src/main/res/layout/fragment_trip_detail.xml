@@ -8,13 +8,12 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <!-- Imagen del viaje + botón favorito -->
+        <!-- Imagen del viaje + botones superpuestos -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="250dp">
+            android:layout_height="260dp">
 
             <ImageView
                 android:id="@+id/ivDetailHeader"
@@ -24,176 +23,224 @@
                 android:scaleType="centerCrop"
                 app:srcCompat="@drawable/ic_launcher_background" />
 
+            <!-- Gradiente oscuro arriba para legibilidad -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_gravity="top"
+                android:background="@drawable/gradient_top_dark" />
+
+            <!-- Botón Atrás -->
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="top|start"
+                android:layout_margin="16dp"
+                android:background="#CCFFFFFF"
+                android:contentDescription="Volver"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/neo_black" />
+
+            <!-- Botón Favorito -->
             <ImageButton
                 android:id="@+id/btnFavorite"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="top|end"
-                android:layout_margin="12dp"
+                android:layout_margin="16dp"
                 android:background="#CCFFFFFF"
                 android:contentDescription="Guardar en favoritos"
-                android:padding="10dp"
+                android:padding="8dp"
                 android:src="@drawable/ic_heart"
                 app:tint="@color/neo_pink" />
 
         </FrameLayout>
 
-        <!-- Card info del viaje -->
-        <androidx.cardview.widget.CardView
+        <!-- Contenido -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp">
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <!-- Card info del viaje -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvDetailDestination"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Destino"
+                        android:textColor="#000000"
+                        android:textSize="26sp"
+                        android:fontFamily="sans-serif-black"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvDetailDates"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Fechas"
+                        android:textColor="#666666"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvDetailBudget"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="Presupuesto"
+                        android:textColor="@color/neo_pink"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <!-- Botones Editar y Borrar rediseñados -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEditTrip"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:text="✏️  Editar"
+                            android:textColor="@color/neo_black"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:backgroundTint="@color/neo_yellow"
+                            app:strokeColor="@color/neo_black"
+                            app:strokeWidth="2dp"
+                            app:cornerRadius="12dp"
+                            android:stateListAnimator="@null" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnDeleteTrip"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="🗑️  Borrar"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:backgroundTint="#E53935"
+                            app:strokeColor="#B71C1C"
+                            app:strokeWidth="2dp"
+                            app:cornerRadius="12dp"
+                            android:stateListAnimator="@null" />
+
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Sección Excursiones -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
 
                 <TextView
-                    android:id="@+id/tvDetailDestination"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Destino"
+                    android:layout_weight="1"
+                    android:text="🗺️ Excursiones"
                     android:textColor="#000000"
-                    android:textSize="24sp"
+                    android:textSize="18sp"
+                    android:fontFamily="sans-serif-black"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvDetailDates"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Fechas"
-                    android:textColor="#666666"
-                    android:textSize="14sp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddExcursion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="+ Añadir"
+                    android:textSize="13sp"
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/neo_pink"
+                    app:cornerRadius="12dp"
+                    android:paddingHorizontal="16dp"
+                    android:stateListAnimator="@null" />
 
-                <TextView
-                    android:id="@+id/tvDetailBudget"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Presupuesto"
-                    android:textColor="#FF1493"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
 
-        <!-- Sección Excursiones -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="🗺️ Excursiones"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/btnAddExcursion"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:text="+ Añadir"
-                android:textSize="13sp"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/neo_pink"
-                app:cornerRadius="12dp"
-                android:paddingHorizontal="16dp"
-                android:stateListAnimator="@null" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvExcursions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            android:paddingHorizontal="0dp" />
-
-        <!-- Itinerario IA -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="✨ Itinerario sugerido por IA"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <ProgressBar
-            android:id="@+id/pbGeneratingItinerary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp" />
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
-
-            <TextView
-                android:id="@+id/tvItineraryResult"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvExcursions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:lineSpacingExtra="8dp"
-                android:lineSpacingMultiplier="1.4"
-                android:padding="16dp"
-                android:text="Esperando itinerario..."
-                android:textColor="#333333"
-                android:textSize="14sp" />
-        </androidx.cardview.widget.CardView>
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp" />
 
-        <!-- Botones editar / borrar -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
-            android:spacing="8dp">
+            <!-- Itinerario IA -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="✨ Itinerario sugerido por IA"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-black"
+                android:textStyle="bold" />
 
-            <Button
-                android:id="@+id/btnEditTrip"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:background="@drawable/button_style"
-                android:text="✏️ Editar"
-                android:textColor="@android:color/white" />
+            <ProgressBar
+                android:id="@+id/pbGeneratingItinerary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp"
+                android:indeterminateTint="@color/neo_pink" />
 
-            <Button
-                android:id="@+id/btnDeleteTrip"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:background="@drawable/button_delete_style"
-                android:text="🗑️ Borrar"
-                android:textColor="@android:color/white" />
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <TextView
+                    android:id="@+id/tvItineraryResult"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:lineSpacingExtra="8dp"
+                    android:lineSpacingMultiplier="1.4"
+                    android:padding="16dp"
+                    android:text="Esperando itinerario..."
+                    android:textColor="#333333"
+                    android:textSize="14sp" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- FAB Compartir -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabShareItinerary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginBottom="8dp"
+                android:contentDescription="Compartir itinerario"
+                app:srcCompat="@drawable/ic_share"
+                app:backgroundTint="@color/neo_pink" />
+
         </LinearLayout>
-
-        <!-- FAB Compartir -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabShareItinerary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="16dp"
-            android:contentDescription="Compartir itinerario"
-            app:srcCompat="@drawable/ic_share"
-            app:backgroundTint="#FF1493" />
-
     </LinearLayout>
 </ScrollView>

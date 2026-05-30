@@ -11,20 +11,41 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Título -->
-        <TextView
+        <!-- Header con botón atrás -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Editar Viaje"
-            android:textColor="#000000"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/neo_card_bg"
+                android:contentDescription="Volver"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/neo_black"
+                android:layout_marginEnd="16dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Editar Viaje"
+                android:textColor="#000000"
+                android:textSize="24sp"
+                android:fontFamily="sans-serif-black"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <!-- Card con formulario -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp">
 
@@ -34,7 +55,6 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Destino -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -53,7 +73,6 @@
                     android:inputType="text"
                     android:padding="12dp" />
 
-                <!-- Fechas -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -73,7 +92,6 @@
                     android:inputType="text"
                     android:padding="12dp" />
 
-                <!-- Presupuesto -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -93,7 +111,6 @@
                     android:inputType="numberDecimal"
                     android:padding="12dp" />
 
-                <!-- Foto de la ciudad -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -106,7 +123,7 @@
                 <ImageView
                     android:id="@+id/ivCityPreview"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="180dp"
                     android:layout_marginTop="8dp"
                     android:contentDescription="Foto de la ciudad"
                     android:scaleType="centerCrop"
@@ -122,34 +139,41 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Botones de acción -->
+        <!-- Botones -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal"
-            android:spacing="8dp">
+            android:orientation="horizontal">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSaveTrip"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:background="@drawable/button_style"
-                android:text="✅ Guardar"
-                android:textColor="@android:color/white" />
+                android:layout_marginEnd="8dp"
+                android:text="✅  Guardar"
+                android:textColor="@color/neo_black"
+                android:textStyle="bold"
+                app:backgroundTint="@color/neo_yellow"
+                app:strokeColor="@color/neo_black"
+                app:strokeWidth="2dp"
+                app:cornerRadius="12dp"
+                android:stateListAnimator="@null" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnCancel"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:background="@drawable/button_cancel_style"
-                android:text="❌ Cancelar"
-                android:textColor="@android:color/white" />
+                android:layout_marginStart="8dp"
+                android:text="❌  Cancelar"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                app:backgroundTint="#757575"
+                app:cornerRadius="12dp"
+                android:stateListAnimator="@null" />
         </LinearLayout>
 
-        <!-- Progress bar -->
         <ProgressBar
             android:id="@+id/pbLoading"
             android:layout_width="wrap_content"

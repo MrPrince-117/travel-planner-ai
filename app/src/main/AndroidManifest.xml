@@ -39,10 +39,6 @@
 <!--            android:name=".ui.main.TripDetailActivity"-->
 <!--            android:exported="false"-->
 <!--            android:label="Detalle del Viaje" />-->
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBL5dwUv7nf8HHGIXR8113rNwzZlgWdQ9A" />
     </application>
 
 </manifest>

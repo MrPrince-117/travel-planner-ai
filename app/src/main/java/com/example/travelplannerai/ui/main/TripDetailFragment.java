@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -30,6 +29,7 @@ import com.example.travelplannerai.data.model.Excursion;
 import com.example.travelplannerai.data.model.Trip;
 import com.example.travelplannerai.ui.adapters.ExcursionAdapter;
 import com.example.travelplannerai.utils.ItineraryFormatter;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -46,14 +46,14 @@ public class TripDetailFragment extends Fragment {
     private TextView     tvDetailDestination, tvDetailDates, tvDetailBudget, tvItineraryResult;
     private ProgressBar  pbGeneratingItinerary;
     private FloatingActionButton fabShareItinerary;
-    private Button       btnEditTrip, btnDeleteTrip;
-    private ImageButton  btnFavorite;
+    private MaterialButton btnEditTrip, btnDeleteTrip;
+    private ImageButton  btnFavorite, btnBack;
 
     // Excursiones
-    private RecyclerView      rvExcursions;
-    private Button            btnAddExcursion;
-    private ExcursionAdapter  excursionAdapter;
-    private List<Excursion>   excursionList;
+    private RecyclerView       rvExcursions;
+    private MaterialButton     btnAddExcursion;
+    private ExcursionAdapter   excursionAdapter;
+    private List<Excursion>    excursionList;
 
     // Estado
     private String  tripId;
@@ -69,7 +69,6 @@ public class TripDetailFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_trip_detail, container, false);
 
-        // Vistas principales
         ivDetailHeader        = view.findViewById(R.id.ivDetailHeader);
         tvDetailDestination   = view.findViewById(R.id.tvDetailDestination);
         tvDetailDates         = view.findViewById(R.id.tvDetailDates);
@@ -80,19 +79,20 @@ public class TripDetailFragment extends Fragment {
         btnEditTrip           = view.findViewById(R.id.btnEditTrip);
         btnDeleteTrip         = view.findViewById(R.id.btnDeleteTrip);
         btnFavorite           = view.findViewById(R.id.btnFavorite);
+        btnBack               = view.findViewById(R.id.btnBack);
+        rvExcursions          = view.findViewById(R.id.rvExcursions);
+        btnAddExcursion       = view.findViewById(R.id.btnAddExcursion);
 
-        // Excursiones
-        rvExcursions   = view.findViewById(R.id.rvExcursions);
-        btnAddExcursion = view.findViewById(R.id.btnAddExcursion);
+        // Botón atrás
+        if (btnBack != null) btnBack.setOnClickListener(v ->
+                Navigation.findNavController(requireView()).popBackStack());
 
-        // Listeners principales
         if (fabShareItinerary != null) fabShareItinerary.setOnClickListener(v -> shareItinerary());
         if (btnEditTrip       != null) btnEditTrip.setOnClickListener(v -> editTrip());
         if (btnDeleteTrip     != null) btnDeleteTrip.setOnClickListener(v -> deleteTrip());
         if (btnFavorite       != null) btnFavorite.setOnClickListener(v -> toggleFavorite());
         if (btnAddExcursion   != null) btnAddExcursion.setOnClickListener(v -> goToCreateExcursion());
 
-        // RecyclerView de excursiones
         excursionList    = new ArrayList<>();
         excursionAdapter = new ExcursionAdapter(excursionList, this::confirmDeleteExcursion);
         if (rvExcursions != null) {
@@ -118,6 +118,113 @@ public class TripDetailFragment extends Fragment {
         }
     }
 
+    // ==================== CARGA DEL VIAJE ====================
+
+    private void loadTripDetails() {
+        FirebaseFirestoreManager.getInstance().getTrip(tripId)
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(() -> {
+                        if (!isAdded()) return;
+                        currentTrip = documentSnapshot.toObject(Trip.class);
+                        if (currentTrip == null) return;
+                        displayTripInfo(currentTrip);
+                        String cached = currentTrip.getItinerary();
+                        if (cached != null && !cached.isEmpty()) {
+                            Log.d(TAG, "📋 Itinerario cacheado encontrado");
+                            pbGeneratingItinerary.setVisibility(View.GONE);
+                            tvItineraryResult.setText(
+                                    ItineraryFormatter.format(
+                                            ItineraryFormatter.cleanMarkdown(cached)));
+                        } else {
+                            Log.d(TAG, "🤖 Sin caché, generando itinerario con IA...");
+                            generateAndSaveItinerary(currentTrip);
+                        }
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ Error cargando trip: " + e.getMessage());
+                    if (isAdded() && getContext() != null)
+                        Toast.makeText(getContext(), "Error al cargar los detalles",
+                                Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void displayTripInfo(Trip trip) {
+        tvDetailDestination.setText(trip.getDestination());
+        tvDetailDates.setText(trip.getDates());
+        tvDetailBudget.setText(trip.getBudget() != null
+                ? trip.getBudget() + "€" : "No especificado");
+        if (trip.getImageUrl() != null && !trip.getImageUrl().isEmpty())
+            Glide.with(this).load(trip.getImageUrl()).centerCrop().into(ivDetailHeader);
+    }
+
+    // ==================== ITINERARIO IA CON CACHÉ ====================
+
+    private void generateAndSaveItinerary(Trip trip) {
+        pbGeneratingItinerary.setVisibility(View.VISIBLE);
+        tvItineraryResult.setText("⏳ Generando itinerario...");
+
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Genera un itinerario de viaje detallado y bien estructurado para ")
+                .append(trip.getDestination());
+        if (trip.getDates() != null && !trip.getDates().isEmpty())
+            prompt.append(", ").append(trip.getDates());
+        if (trip.getBudget() != null && trip.getBudget() > 0)
+            prompt.append(", presupuesto de ").append(trip.getBudget()).append("€");
+        prompt.append(".\n\nINSTRUCCIONES DE FORMATO:\n")
+                .append("- Usa # para el título principal\n")
+                .append("- Usa ### para cada día: ### Día 1: [descripción]\n")
+                .append("- Usa #### para subsecciones: #### Mañana, #### Tarde, #### Noche\n")
+                .append("- Usa - para cada actividad\n")
+                .append("- Usa **texto** para resaltar lugares importantes\n")
+                .append("Incluye: actividades turísticas, restaurantes, transporte y consejos.");
+
+        StringBuilder context = new StringBuilder();
+        context.append("Destino: ").append(trip.getDestination()).append("\n");
+        if (trip.getDates() != null && !trip.getDates().isEmpty())
+            context.append("Fechas: ").append(trip.getDates()).append("\n");
+        if (trip.getBudget() != null && trip.getBudget() > 0)
+            context.append("Presupuesto: ").append(trip.getBudget()).append("€\n");
+
+        OpenAIManager.getInstance().sendMessage(prompt.toString(), context.toString(),
+                new OpenAIManager.ResponseCallback() {
+                    @Override
+                    public void onSuccess(String response) {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(() -> {
+                            if (!isAdded()) return;
+                            pbGeneratingItinerary.setVisibility(View.GONE);
+                            String cleaned = ItineraryFormatter.cleanMarkdown(response);
+                            tvItineraryResult.setText(ItineraryFormatter.format(cleaned));
+                            saveItineraryToFirestore(response);
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(() -> {
+                            if (!isAdded()) return;
+                            pbGeneratingItinerary.setVisibility(View.GONE);
+                            tvItineraryResult.setText("❌ Error al generar el itinerario");
+                            if (getContext() != null)
+                                Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
+                        });
+                    }
+                });
+    }
+
+    private void saveItineraryToFirestore(String itinerary) {
+        if (tripId == null) return;
+        Map<String, Object> update = new HashMap<>();
+        update.put("itinerary", itinerary);
+        FirebaseFirestoreManager.getInstance()
+                .getCollection("trips").document(tripId).update(update)
+                .addOnSuccessListener(v -> Log.d(TAG, "✅ Itinerario guardado"))
+                .addOnFailureListener(e -> Log.e(TAG, "❌ Error guardando: " + e.getMessage()));
+    }
+
     // ==================== EXCURSIONES ====================
 
     private void goToCreateExcursion() {
@@ -129,17 +236,13 @@ public class TripDetailFragment extends Fragment {
 
     private void loadExcursions() {
         FirebaseFirestoreManager.getInstance()
-                .getCollection("trips/" + tripId + "/excursions")
-                .get()
+                .getCollection("trips/" + tripId + "/excursions").get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (!isAdded()) return;
                     excursionList.clear();
                     for (com.google.firebase.firestore.QueryDocumentSnapshot doc : querySnapshot) {
-                        Excursion excursion = doc.toObject(Excursion.class);
-                        if (excursion != null) {
-                            excursion.setId(doc.getId());
-                            excursionList.add(excursion);
-                        }
+                        Excursion exc = doc.toObject(Excursion.class);
+                        if (exc != null) { exc.setId(doc.getId()); excursionList.add(exc); }
                     }
                     excursionAdapter.notifyDataSetChanged();
                 })
@@ -150,17 +253,15 @@ public class TripDetailFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Eliminar excursión")
                 .setMessage("¿Seguro que quieres eliminar \"" + excursion.getName() + "\"?")
-                .setPositiveButton("Eliminar", (dialog, which) -> deleteExcursion(excursion))
-                .setNegativeButton("Cancelar", null)
-                .show();
+                .setPositiveButton("Eliminar", (d, w) -> deleteExcursion(excursion))
+                .setNegativeButton("Cancelar", null).show();
     }
 
     private void deleteExcursion(Excursion excursion) {
         FirebaseFirestoreManager.getInstance()
                 .getCollection("trips/" + tripId + "/excursions")
-                .document(excursion.getId())
-                .delete()
-                .addOnSuccessListener(aVoid -> {
+                .document(excursion.getId()).delete()
+                .addOnSuccessListener(v -> {
                     if (!isAdded()) return;
                     excursionList.remove(excursion);
                     excursionAdapter.notifyDataSetChanged();
@@ -177,17 +278,14 @@ public class TripDetailFragment extends Fragment {
     private void checkIfFavorite() {
         String userId = FirebaseAuthManager.getInstance().getCurrentUserId();
         if (userId == null || tripId == null) return;
-
         FirebaseFirestoreManager.getInstance()
                 .getCollection(FirebaseFirestoreManager.COLLECTION_FAVORITES)
-                .whereEqualTo("userId", userId)
-                .whereEqualTo("tripId", tripId)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
+                .whereEqualTo("userId", userId).whereEqualTo("tripId", tripId).get()
+                .addOnSuccessListener(snap -> {
                     if (!isAdded()) return;
-                    if (!querySnapshot.isEmpty()) {
+                    if (!snap.isEmpty()) {
                         isFavorite    = true;
-                        favoriteDocId = querySnapshot.getDocuments().get(0).getId();
+                        favoriteDocId = snap.getDocuments().get(0).getId();
                         updateFavoriteIcon();
                     }
                 });
@@ -200,21 +298,17 @@ public class TripDetailFragment extends Fragment {
     private void addFavorite() {
         String userId = FirebaseAuthManager.getInstance().getCurrentUserId();
         if (userId == null || tripId == null || currentTrip == null) return;
-
-        Map<String, Object> favoriteData = new HashMap<>();
-        favoriteData.put("userId",      userId);
-        favoriteData.put("tripId",      tripId);
-        favoriteData.put("destination", currentTrip.getDestination());
-        favoriteData.put("dates",       currentTrip.getDates());
-        favoriteData.put("budget",      currentTrip.getBudget());
-        favoriteData.put("imageUrl",    currentTrip.getImageUrl());
-        favoriteData.put("savedAt",     System.currentTimeMillis());
-
-        FirebaseFirestoreManager.getInstance().addToFavorites(favoriteData)
+        Map<String, Object> data = new HashMap<>();
+        data.put("userId", userId); data.put("tripId", tripId);
+        data.put("destination", currentTrip.getDestination());
+        data.put("dates", currentTrip.getDates());
+        data.put("budget", currentTrip.getBudget());
+        data.put("imageUrl", currentTrip.getImageUrl());
+        data.put("savedAt", System.currentTimeMillis());
+        FirebaseFirestoreManager.getInstance().addToFavorites(data)
                 .addOnSuccessListener(docRef -> {
                     if (!isAdded()) return;
-                    isFavorite    = true;
-                    favoriteDocId = docRef.getId();
+                    isFavorite = true; favoriteDocId = docRef.getId();
                     updateFavoriteIcon();
                     Toast.makeText(getContext(), "❤️ Añadido a favoritos", Toast.LENGTH_SHORT).show();
                 })
@@ -227,10 +321,9 @@ public class TripDetailFragment extends Fragment {
     private void removeFavorite() {
         if (favoriteDocId == null) return;
         FirebaseFirestoreManager.getInstance().removeFromFavorites(favoriteDocId)
-                .addOnSuccessListener(aVoid -> {
+                .addOnSuccessListener(v -> {
                     if (!isAdded()) return;
-                    isFavorite    = false;
-                    favoriteDocId = null;
+                    isFavorite = false; favoriteDocId = null;
                     updateFavoriteIcon();
                     Toast.makeText(getContext(), "💔 Eliminado de favoritos", Toast.LENGTH_SHORT).show();
                 })
@@ -245,95 +338,13 @@ public class TripDetailFragment extends Fragment {
         btnFavorite.setImageResource(isFavorite ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
     }
 
-    // ==================== CARGA Y VISUALIZACIÓN ====================
-
-    private void loadTripDetails() {
-        FirebaseFirestoreManager.getInstance().getTrip(tripId)
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            if (!isAdded()) return;
-                            currentTrip = documentSnapshot.toObject(Trip.class);
-                            if (currentTrip != null) {
-                                displayTripInfo(currentTrip);
-                                generateAIItinerary(currentTrip);
-                            }
-                        });
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "❌ Error cargando trip: " + e.getMessage());
-                    if (isAdded() && getContext() != null) {
-                        Toast.makeText(getContext(), "Error al cargar los detalles del viaje", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private void displayTripInfo(Trip trip) {
-        tvDetailDestination.setText(trip.getDestination());
-        tvDetailDates.setText(trip.getDates());
-        tvDetailBudget.setText(trip.getBudget() != null ? trip.getBudget() + "€" : "No especificado");
-        if (trip.getImageUrl() != null && !trip.getImageUrl().isEmpty()) {
-            Glide.with(this).load(trip.getImageUrl()).centerCrop().into(ivDetailHeader);
-        }
-    }
-
-    private void generateAIItinerary(Trip trip) {
-        pbGeneratingItinerary.setVisibility(View.VISIBLE);
-        tvItineraryResult.setText("⏳ Generando itinerario...");
-
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Genera un itinerario detallado para mi viaje a ").append(trip.getDestination());
-        if (trip.getDates() != null && !trip.getDates().isEmpty())
-            prompt.append(" durante ").append(trip.getDates());
-        if (trip.getBudget() != null && trip.getBudget() > 0)
-            prompt.append(" con un presupuesto de ").append(trip.getBudget()).append("€");
-        prompt.append(". Incluye recomendaciones de lugares turísticos, restaurantes y actividades organizadas por días.");
-        prompt.append(" Usa formato Markdown con ### para títulos principales y #### para subtítulos de cada día.");
-
-        StringBuilder context = new StringBuilder();
-        context.append("Destino: ").append(trip.getDestination()).append("\n");
-        if (trip.getDates() != null && !trip.getDates().isEmpty())
-            context.append("Fechas: ").append(trip.getDates()).append("\n");
-        if (trip.getBudget() != null && trip.getBudget() > 0)
-            context.append("Presupuesto: ").append(trip.getBudget()).append("€\n");
-
-        OpenAIManager.getInstance().sendMessage(prompt.toString(), context.toString(),
-                new OpenAIManager.ResponseCallback() {
-                    @Override
-                    public void onSuccess(String response) {
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(() -> {
-                                if (isAdded()) {
-                                    pbGeneratingItinerary.setVisibility(View.GONE);
-                                    tvItineraryResult.setText(ItineraryFormatter.format(
-                                            ItineraryFormatter.cleanMarkdown(response)));
-                                }
-                            });
-                        }
-                    }
-                    @Override
-                    public void onError(String error) {
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(() -> {
-                                if (isAdded()) {
-                                    pbGeneratingItinerary.setVisibility(View.GONE);
-                                    tvItineraryResult.setText("❌ Error al generar el itinerario");
-                                    if (getContext() != null)
-                                        Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
-                                }
-                            });
-                        }
-                    }
-                });
-    }
-
     // ==================== ACCIONES ====================
 
     private void shareItinerary() {
         String itinerary = tvItineraryResult.getText().toString();
         if (itinerary.isEmpty() || itinerary.contains("Generando") || itinerary.contains("Error")) {
-            Toast.makeText(getContext(), "⏳ Espera a que se genere el itinerario", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "⏳ Espera a que se genere el itinerario",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
         String destination = tvDetailDestination.getText().toString();
@@ -356,24 +367,25 @@ public class TripDetailFragment extends Fragment {
         if (tripId == null) return;
         new AlertDialog.Builder(requireContext())
                 .setTitle("Borrar viaje")
-                .setMessage("¿Estás seguro de que deseas borrar este viaje? Esta acción no se puede deshacer.")
+                .setMessage("¿Estás seguro? Esta acción no se puede deshacer.")
                 .setPositiveButton("Borrar", (dialog, which) -> {
                     pbGeneratingItinerary.setVisibility(View.VISIBLE);
                     FirebaseFirestoreManager.getInstance().deleteTrip(tripId)
-                            .addOnSuccessListener(aVoid -> {
+                            .addOnSuccessListener(v -> {
                                 if (isAdded()) {
-                                    Toast.makeText(getContext(), "✅ Viaje borrado correctamente", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), "✅ Viaje borrado",
+                                            Toast.LENGTH_SHORT).show();
                                     Navigation.findNavController(requireView()).popBackStack();
                                 }
                             })
                             .addOnFailureListener(e -> {
                                 if (isAdded()) {
                                     pbGeneratingItinerary.setVisibility(View.GONE);
-                                    Toast.makeText(getContext(), "❌ Error al borrar el viaje", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), "❌ Error al borrar",
+                                            Toast.LENGTH_SHORT).show();
                                 }
                             });
                 })
-                .setNegativeButton("Cancelar", null)
-                .show();
+                .setNegativeButton("Cancelar", null).show();
     }
 }

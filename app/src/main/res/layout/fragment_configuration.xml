@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFDF6"
+    android:background="@color/neo_bg"
     android:fillViewport="true">
 
     <LinearLayout
@@ -12,25 +12,242 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <TextView
-            android:id="@+id/tvConfigTitle"
-            android:layout_width="wrap_content"
+        <!-- Título -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Configuración"
-            android:textColor="#000000"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_settings_gear"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Perfil y Ajustes"
+                android:textColor="@color/neo_black"
+                android:textSize="26sp"
+                android:fontFamily="sans-serif-black"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- ── SECCIÓN: Mi Perfil ── -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cuenta y Seguridad"
+            android:text="MI PERFIL"
             android:textColor="#7A7A7A"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            android:textAllCaps="true"/>
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="#FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Avatar + nombre -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="28dp"
+                        app:cardBackgroundColor="@color/neo_yellow"
+                        app:strokeColor="@color/neo_black"
+                        app:strokeWidth="2dp"
+                        app:cardElevation="0dp">
+
+                        <TextView
+                            android:id="@+id/tvAvatarInitial"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="B"
+                            android:textColor="@color/neo_black"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:layout_marginStart="16dp">
+
+                        <TextView
+                            android:id="@+id/tvProfileName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cargando..."
+                            android:textColor="@color/neo_black"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvProfileEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="#7A7A7A"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Editar nombre -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEditName"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Nombre de usuario"
+                    app:boxStrokeColor="@color/neo_black"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    android:layout_marginBottom="12dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etEditName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPersonName"
+                        android:textColor="@color/neo_black" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSaveName"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="Guardar nombre"
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/neo_black"
+                    app:cornerRadius="12dp"
+                    android:stateListAnimator="@null" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ── SECCIÓN: Estadísticas ── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MIS ESTADÍSTICAS"
+            android:textColor="#7A7A7A"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <!-- Viajes -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/neo_pink">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvStatTrips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textColor="@color/white"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Viajes"
+                        android:textColor="@color/white"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Favoritos -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/neo_yellow">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvStatFavorites"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="—"
+                        android:textColor="@color/neo_black"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Favoritos"
+                        android:textColor="@color/neo_black"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+        <!-- ── SECCIÓN: Cuenta ── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CUENTA Y SEGURIDAD"
+            android:textColor="#7A7A7A"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="8dp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -46,8 +263,9 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
+                <!-- Cambiar contraseña -->
                 <LinearLayout
-                    android:id="@+id/optionLinkAccounts"
+                    android:id="@+id/optionChangePassword"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
@@ -60,34 +278,34 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_share"
-                        app:tint="#000000" />
+                        android:src="@android:drawable/ic_lock_idle_lock"
+                        app:tint="@color/neo_black" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="16dp"
-                        android:text="Vinculación de cuentas"
-                        android:textColor="#000000"
-                        android:textSize="16sp" />
+                        android:text="Cambiar contraseña"
+                        android:textColor="@color/neo_black"
+                        android:textSize="15sp" />
 
-                    <!-- CORRECCIÓN: Se cambió search_go por ic_media_play -->
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:src="@android:drawable/ic_media_play"
-                        app:tint="#7A7A7A" />
+                        app:tint="#AAAAAA" />
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#EEEEEE"
-                    android:layout_marginHorizontal="16dp"/>
+                    android:layout_marginHorizontal="16dp" />
 
+                <!-- Eliminar cuenta -->
                 <LinearLayout
-                    android:id="@+id/optionUserActions"
+                    android:id="@+id/optionDeleteAccount"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
@@ -100,37 +318,38 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_myplaces"
-                        app:tint="#000000" />
+                        android:src="@android:drawable/ic_menu_delete"
+                        app:tint="#E53935" />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="16dp"
-                        android:text="Acciones del usuario"
-                        android:textColor="#000000"
-                        android:textSize="16sp" />
+                        android:text="Eliminar cuenta"
+                        android:textColor="#E53935"
+                        android:textSize="15sp" />
 
-                    <!-- CORRECCIÓN: Se cambió search_go por ic_media_play -->
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
                         android:src="@android:drawable/ic_media_play"
-                        app:tint="#7A7A7A" />
+                        app:tint="#AAAAAA" />
                 </LinearLayout>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- ── SECCIÓN: Preferencias ── -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Preferencias"
+            android:text="PREFERENCIAS"
             android:textColor="#7A7A7A"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            android:textAllCaps="true"/>
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="8dp" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -146,6 +365,7 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
+                <!-- Notificaciones -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
@@ -157,7 +377,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@android:drawable/ic_popup_reminder"
-                        app:tint="#000000" />
+                        app:tint="@color/neo_black" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -165,31 +385,44 @@
                         android:layout_weight="1"
                         android:layout_marginStart="16dp"
                         android:text="Notificaciones de viajes"
-                        android:textColor="#000000"
-                        android:textSize="16sp" />
+                        android:textColor="@color/neo_black"
+                        android:textSize="15sp" />
 
                     <androidx.appcompat.widget.SwitchCompat
                         android:id="@+id/switchNotifications"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        app:thumbTint="#FF1493"
-                        app:trackTint="#FFB6C1"/>
+                        app:thumbTint="@color/neo_pink"
+                        app:trackTint="#FFB6C1" />
                 </LinearLayout>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <Button
+        <!-- Cerrar sesión -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:backgroundTint="#FF1493"
             android:text="CERRAR SESIÓN"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:textColor="@color/white"
+            android:textSize="15sp"
             android:textStyle="bold"
+            app:backgroundTint="@color/neo_pink"
             app:cornerRadius="16dp"
-            />
+            android:stateListAnimator="@null"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Versión -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TravelPlannerAI v1.0 · Proyecto TFG"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
 
     </LinearLayout>
 </ScrollView>

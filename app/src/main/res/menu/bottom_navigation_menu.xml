@@ -12,11 +12,6 @@
         android:title="Mis Viajes" />
 
     <item
-        android:id="@+id/placesSearchFragment"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="Explorar" />
-
-    <item
         android:id="@+id/favoritesFragment"
         android:icon="@drawable/ic_heart_filled"
         android:title="Favoritos" />
@@ -25,5 +20,10 @@
         android:id="@+id/chatFragment"
         android:icon="@android:drawable/stat_notify_chat"
         android:title="IA Chat" />
+
+    <item
+        android:id="@+id/configurationFragment"
+        android:icon="@drawable/ic_settings_gear"
+        android:title="Perfil" />
 
 </menu>

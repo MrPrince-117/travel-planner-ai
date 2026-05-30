@@ -22,6 +22,8 @@
             app:destination="@id/chatFragment" />
         <action android:id="@+id/action_homeFragment_to_configurationFragment"
             app:destination="@id/configurationFragment" />
+        <action android:id="@+id/action_homeFragment_to_placesSearchFragment"
+            app:destination="@id/placesSearchFragment" />
     </fragment>
 
     <fragment
@@ -102,10 +104,6 @@
         android:label="Ajustes"
         tools:layout="@layout/fragment_configuration" />
 
-    <fragment
-        android:id="@+id/mapFragment"
-        android:name="com.example.travelplannerai.ui.map.MapFragment"
-        android:label="Mapa"
-        tools:layout="@layout/fragment_map" />
+
 
 </navigation>

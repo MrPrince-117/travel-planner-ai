@@ -24,11 +24,11 @@ android {
 
         val openAiKey     = localProps.getProperty("OPENAI_API_KEY",     "")
         val unsplashKey   = localProps.getProperty("UNSPLASH_API_KEY",   "")
-        val foursquareKey = localProps.getProperty("FOURSQUARE_API_KEY", "")
+
 
         buildConfigField("String", "OPENAI_API_KEY",     "\"$openAiKey\"")
         buildConfigField("String", "UNSPLASH_API_KEY",   "\"$unsplashKey\"")
-        buildConfigField("String", "FOURSQUARE_API_KEY", "\"$foursquareKey\"")
+
     }
 
     buildFeatures {
@@ -53,8 +53,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.navigation.ui)
 
-    // Google Maps
-    implementation(libs.play.services.maps)
+
 
     // HTTP Client for Gemini API
     implementation("com.squareup.okhttp3:okhttp:4.12.0")

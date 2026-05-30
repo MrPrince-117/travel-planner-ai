@@ -1,11 +1,13 @@
 package com.example.travelplannerai.ui.main;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -18,25 +20,26 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelplannerai.R;
-import com.example.travelplannerai.data.api.FoursquareManager;
+import com.example.travelplannerai.data.api.NominatimManager;
 import com.example.travelplannerai.ui.adapters.PlaceResultAdapter;
-import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlacesSearchFragment extends Fragment implements PlaceResultAdapter.OnPlaceActionListener {
+public class PlacesSearchFragment extends Fragment {
 
-    private EditText    etSearch;
+    private EditText     etSearch;
     private RecyclerView rvResults;
     private ProgressBar  progressBar;
-    private TextView     tvEmpty;
     private ChipGroup    chipGroup;
 
-    private PlaceResultAdapter          adapter;
-    private List<FoursquareManager.Place> placeList;
-    private String currentCategory = null; // null = todas
+    private PlaceResultAdapter      adapter;
+    private List<NominatimManager.Place> placeList;
+    private String currentCategory = null;
+
+    // Flag para evitar búsquedas duplicadas
+    private boolean isSearching = false;
 
     @Nullable
     @Override
@@ -47,53 +50,47 @@ public class PlacesSearchFragment extends Fragment implements PlaceResultAdapter
         etSearch    = view.findViewById(R.id.etPlaceSearch);
         rvResults   = view.findViewById(R.id.rvPlaceResults);
         chipGroup   = view.findViewById(R.id.chipGroupFilters);
+        progressBar = view.findViewById(R.id.progressBarPlaces);
 
-        // ProgressBar y estado vacío programáticos (no están en el layout original)
-        progressBar = new ProgressBar(getContext());
-        tvEmpty     = new TextView(getContext());
-        tvEmpty.setText("Busca hoteles, restaurantes o museos en cualquier ciudad");
-        tvEmpty.setTextSize(14);
-        tvEmpty.setPadding(16, 32, 16, 0);
-
-        // RecyclerView
         placeList = new ArrayList<>();
-        adapter   = new PlaceResultAdapter(placeList, this);
+        adapter   = new PlaceResultAdapter(placeList, place -> {
+            Toast.makeText(getContext(),
+                    "📍 " + place.name + " guardado", Toast.LENGTH_SHORT).show();
+        });
+
         rvResults.setLayoutManager(new LinearLayoutManager(getContext()));
         rvResults.setAdapter(adapter);
 
-        // Buscar al pulsar Enter o el botón de búsqueda del teclado
+        // Buscar solo al pulsar "Buscar" del teclado — evita dobles llamadas
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH
-                    || (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
-                performSearch();
+                    || actionId == EditorInfo.IME_ACTION_DONE
+                    || (event != null
+                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                    && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                if (!isSearching) performSearch();
                 return true;
             }
             return false;
         });
 
-        // Chips de filtro
         setupChips(view);
-
         return view;
     }
 
     private void setupChips(View view) {
-        Chip chipHotels      = view.findViewById(R.id.chipHotels);
-        Chip chipRestaurants = view.findViewById(R.id.chipRestaurants);
-        Chip chipMuseums     = view.findViewById(R.id.chipMuseums);
-
         chipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             if (checkedIds.isEmpty()) {
                 currentCategory = null;
             } else {
                 int id = checkedIds.get(0);
-                if (id == R.id.chipHotels)      currentCategory = "hotel";
-                else if (id == R.id.chipRestaurants) currentCategory = "restaurant";
-                else if (id == R.id.chipMuseums)     currentCategory = "museum";
+                if      (id == R.id.chipHotels)      currentCategory = "hotel";
+                else if (id == R.id.chipRestaurants) currentCategory = "restaurante";
+                else if (id == R.id.chipMuseums)     currentCategory = "museo";
             }
-            // Si ya hay texto buscado, volver a buscar con el nuevo filtro
+            // Re-buscar si ya hay texto
             String query = etSearch.getText().toString().trim();
-            if (!query.isEmpty()) performSearch();
+            if (!query.isEmpty() && !isSearching) performSearch();
         });
     }
 
@@ -105,28 +102,26 @@ public class PlacesSearchFragment extends Fragment implements PlaceResultAdapter
         }
 
         // Ocultar teclado
-        android.view.inputmethod.InputMethodManager imm =
-                (android.view.inputmethod.InputMethodManager)
-                        requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager)
+                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) imm.hideSoftInputFromWindow(etSearch.getWindowToken(), 0);
 
+        // Construir query: si hay categoría seleccionada, añadirla al texto
+        String finalQuery = currentCategory != null
+                ? currentCategory + " " + query
+                : query;
+
         showLoading(true);
+        isSearching = true;
 
-        // Separar ciudad del query si el usuario escribió "restaurantes en Roma"
-        // o usar el query completo como "near"
-        String near = query;
-        String searchQuery = currentCategory != null ? currentCategory : query;
-
-        FoursquareManager.getInstance().searchPlaces(
-                searchQuery,
-                near,
-                currentCategory,
-                new FoursquareManager.PlacesCallback() {
+        NominatimManager.getInstance().searchPlaces(finalQuery,
+                new NominatimManager.PlacesCallback() {
                     @Override
-                    public void onSuccess(List<FoursquareManager.Place> places) {
+                    public void onSuccess(List<NominatimManager.Place> places) {
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(() -> {
                             if (!isAdded()) return;
+                            isSearching = false;
                             showLoading(false);
                             placeList.clear();
                             placeList.addAll(places);
@@ -145,23 +140,18 @@ public class PlacesSearchFragment extends Fragment implements PlaceResultAdapter
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(() -> {
                             if (!isAdded()) return;
+                            isSearching = false;
                             showLoading(false);
-                            Toast.makeText(getContext(), "Error: " + error, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(),
+                                    "Error al buscar: " + error, Toast.LENGTH_LONG).show();
                         });
                     }
-                }
-        );
-    }
-
-    @Override
-    public void onAddPlace(FoursquareManager.Place place) {
-        // Muestra confirmación al añadir un lugar
-        Toast.makeText(getContext(),
-                "📍 " + place.name + " guardado",
-                Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void showLoading(boolean show) {
+        if (progressBar != null)
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         rvResults.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 }

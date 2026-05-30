@@ -3,155 +3,171 @@ package com.example.travelplannerai.utils;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.BulletSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
 /**
- * Utilidad para formatear texto de itinerarios generados por IA
- * con estilos visuales mejorados (negritas, colores, tamaños, emojis por día)
+ * Formatea el texto markdown del itinerario generado por IA
+ * en un texto visualmente rico usando Spannable.
  */
 public class ItineraryFormatter {
 
-    /**
-     * Formatea el texto del itinerario para mejor legibilidad
-     *
-     * Aplica estilos a:
-     * - Líneas que empiezan con ### (Títulos principales)
-     * - Líneas que empiezan con #### (Subtítulos con emojis automáticos por día)
-     * - Líneas con ** (Negritas)
-     * - Emojis de día (automáticos según número de día detectado)
-     */
-    public static SpannableStringBuilder format(String rawText) {
-        if (rawText == null || rawText.isEmpty()) {
-            return new SpannableStringBuilder("");
-        }
+    // Colores neo-brutal de la app
+    private static final int COLOR_TITLE    = 0xFF000000; // Negro — títulos principales
+    private static final int COLOR_DAY      = 0xFFFF1493; // Rosa neo — encabezado de día
+    private static final int COLOR_SECTION  = 0xFF1E88E5; // Azul — secciones
+    private static final int COLOR_BODY     = 0xFF333333; // Gris oscuro — texto normal
+    private static final int COLOR_BULLET   = 0xFFFF1493; // Rosa — bullets
 
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        String[] lines = rawText.split("\n");
+    public static SpannableStringBuilder format(String rawText) {
+        if (rawText == null || rawText.isEmpty())
+            return new SpannableStringBuilder("");
+
+        SpannableStringBuilder sb  = new SpannableStringBuilder();
+        String[]               lines = rawText.split("\n");
 
         for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
+            String line = lines[i].trim();
 
-            // Saltar líneas vacías extra
-            if (line.trim().isEmpty() && i > 0 && lines[i-1].trim().isEmpty()) {
+            // Ignorar líneas vacías consecutivas
+            if (line.isEmpty()) {
+                if (sb.length() > 0 && sb.charAt(sb.length() - 1) != '\n')
+                    sb.append("\n");
                 continue;
             }
 
-            // TÍTULOS PRINCIPALES (###)
-            if (line.startsWith("###")) {
-                String title = line.replace("###", "").trim();
-                int start = builder.length();
-                builder.append(title);
-                builder.append("\n\n");
+            // ── H1: # Título principal ──────────────────────────────────
+            if (line.startsWith("# ") && !line.startsWith("## ")) {
+                String text  = line.substring(2).trim();
+                int    start = sb.length();
+                sb.append("\n").append(text).append("\n\n");
+                applyStyle(sb, start + 1, start + 1 + text.length(),
+                        COLOR_TITLE, 1.4f, Typeface.BOLD);
 
-                // Aplicar estilos: negrita + tamaño grande + color negro
-                builder.setSpan(new StyleSpan(Typeface.BOLD), start, builder.length() - 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                builder.setSpan(new RelativeSizeSpan(1.3f), start, builder.length() - 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                builder.setSpan(new ForegroundColorSpan(0xFF000000), start, builder.length() - 2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            // SUBTÍTULOS (####) - CON EMOJIS AUTOMÁTICOS DE DÍA
-            else if (line.startsWith("####")) {
-                String subtitle = line.replace("####", "").trim();
+                // ── H2: ## Subtítulo ─────────────────────────────────────────
+            } else if (line.startsWith("## ") && !line.startsWith("### ")) {
+                String text  = line.substring(3).trim();
+                int    start = sb.length();
+                sb.append(text).append("\n\n");
+                applyStyle(sb, start, start + text.length(),
+                        COLOR_SECTION, 1.2f, Typeface.BOLD);
 
-                // ✅ AÑADIR EMOJI según el número de día
-                String emoji = getDayEmoji(subtitle);
+                // ── H3: ### Día / Sección ────────────────────────────────────
+            } else if (line.startsWith("### ") && !line.startsWith("#### ")) {
+                String text  = line.substring(4).trim();
+                String emoji = getDayEmoji(text);
+                int    start = sb.length();
+                // Separador visual antes del día
+                sb.append("─────────────────\n");
+                int sepEnd = sb.length();
+                sb.append(emoji).append(text).append("\n\n");
+                applyStyle(sb, sepEnd, sb.length() - 2,
+                        COLOR_DAY, 1.25f, Typeface.BOLD);
+                // Separador en gris claro
+                applyColor(sb, start, start + 17, 0xFFCCCCCC);
 
-                int start = builder.length();
-                builder.append(emoji + subtitle);
-                builder.append("\n");
+                // ── H4: #### Subsección ──────────────────────────────────────
+            } else if (line.startsWith("#### ")) {
+                String text  = line.substring(5).trim();
+                int    start = sb.length();
+                sb.append("  ").append(text).append("\n");
+                applyStyle(sb, start + 2, start + 2 + text.length(),
+                        COLOR_SECTION, 1.1f, Typeface.BOLD_ITALIC);
 
-                // Aplicar estilos: negrita + tamaño medio + color azul
-                builder.setSpan(new StyleSpan(Typeface.BOLD), start, builder.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                builder.setSpan(new RelativeSizeSpan(1.15f), start, builder.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                builder.setSpan(new ForegroundColorSpan(0xFF1E88E5), start, builder.length() - 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            // NEGRITAS (**texto**)
-            else if (line.contains("**")) {
-                formatBoldText(builder, line);
-                builder.append("\n");
-            }
-            // LÍNEAS NORMALES
-            else {
-                builder.append(line);
-                builder.append("\n");
+                // ── Bullet: - item o * item ───────────────────────────────────
+            } else if (line.startsWith("- ") || line.startsWith("* ")) {
+                String text  = line.substring(2).trim();
+                int    start = sb.length();
+                sb.append("  • ").append(formatInlineBold(text)).append("\n");
+                // Color del bullet
+                applyColor(sb, start, start + 4, COLOR_BULLET);
+
+                // ── Negrita **texto** inline ──────────────────────────────────
+            } else if (line.contains("**")) {
+                int start = sb.length();
+                sb.append(formatInlineBold(line)).append("\n");
+
+                // ── Texto normal ──────────────────────────────────────────────
+            } else {
+                int start = sb.length();
+                sb.append(line).append("\n");
+                applyColor(sb, start, start + line.length(), COLOR_BODY);
             }
         }
 
-        return builder;
+        return sb;
     }
 
     /**
-     * ✅ Obtiene el emoji apropiado según el día del itinerario
-     *
-     * Detecta automáticamente el número de día en el texto y asigna emojis:
-     * - Día 1: 🌅 (Amanecer - inicio del viaje)
-     * - Día 2: ☀️ (Sol - día completo)
-     * - Día 3: 🌆 (Atardecer)
-     * - Día 4: 🌃 (Noche)
-     * - Día 5: 🌙 (Luna)
-     * - Día 6: ⭐ (Estrella)
-     * - Día 7: 🎆 (Fuegos artificiales - final)
-     * - Genérico: 📅 (Calendario)
+     * Convierte **texto** en negrita dentro de una línea
+     * devolviendo un SpannableStringBuilder inline.
      */
-    private static String getDayEmoji(String subtitle) {
-        String lowerSubtitle = subtitle.toLowerCase();
-
-        // Detectar número de día específico
-        if (lowerSubtitle.contains("día 1") || lowerSubtitle.contains("dia 1")) {
-            return "🌅 "; // Amanecer - Primer día
-        } else if (lowerSubtitle.contains("día 2") || lowerSubtitle.contains("dia 2")) {
-            return "☀️ "; // Sol - Segundo día
-        } else if (lowerSubtitle.contains("día 3") || lowerSubtitle.contains("dia 3")) {
-            return "🌆 "; // Atardecer - Tercer día
-        } else if (lowerSubtitle.contains("día 4") || lowerSubtitle.contains("dia 4")) {
-            return "🌃 "; // Noche - Cuarto día
-        } else if (lowerSubtitle.contains("día 5") || lowerSubtitle.contains("dia 5")) {
-            return "🌙 "; // Luna - Quinto día
-        } else if (lowerSubtitle.contains("día 6") || lowerSubtitle.contains("dia 6")) {
-            return "⭐ "; // Estrella - Sexto día
-        } else if (lowerSubtitle.contains("día 7") || lowerSubtitle.contains("dia 7")) {
-            return "🎆 "; // Fuegos artificiales - Séptimo día
-        }
-
-        // Si detecta "día" pero no encuentra número específico
-        if (lowerSubtitle.contains("día") || lowerSubtitle.contains("dia")) {
-            return "📅 "; // Calendario genérico
-        }
-
-        return ""; // Sin emoji
-    }
-
-    /**
-     * Formatea texto con negritas (**texto**)
-     */
-    private static void formatBoldText(SpannableStringBuilder builder, String line) {
+    private static SpannableStringBuilder formatInlineBold(String line) {
+        SpannableStringBuilder result = new SpannableStringBuilder();
         String[] parts = line.split("\\*\\*");
-        boolean isBold = false;
 
-        for (String part : parts) {
-            if (part.isEmpty()) continue;
-
-            int start = builder.length();
-            builder.append(part);
-
-            if (isBold) {
-                builder.setSpan(new StyleSpan(Typeface.BOLD), start, builder.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        for (int i = 0; i < parts.length; i++) {
+            int start = result.length();
+            result.append(parts[i]);
+            if (i % 2 == 1) { // índice impar = dentro de **...**
+                result.setSpan(new StyleSpan(Typeface.BOLD),
+                        start, result.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                result.setSpan(new ForegroundColorSpan(COLOR_TITLE),
+                        start, result.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                result.setSpan(new ForegroundColorSpan(COLOR_BODY),
+                        start, result.length(),
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-
-            isBold = !isBold;
         }
+        return result;
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private static void applyStyle(SpannableStringBuilder sb, int start, int end,
+                                   int color, float size, int typefaceStyle) {
+        if (start >= end) return;
+        sb.setSpan(new ForegroundColorSpan(color),    start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new RelativeSizeSpan(size),        start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new StyleSpan(typefaceStyle),      start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    private static void applyColor(SpannableStringBuilder sb, int start, int end, int color) {
+        if (start >= end || end > sb.length()) return;
+        sb.setSpan(new ForegroundColorSpan(color), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    private static String getDayEmoji(String text) {
+        String lower = text.toLowerCase();
+        if (lower.contains("día 1") || lower.contains("dia 1")) return "🌅 ";
+        if (lower.contains("día 2") || lower.contains("dia 2")) return "☀️ ";
+        if (lower.contains("día 3") || lower.contains("dia 3")) return "🌆 ";
+        if (lower.contains("día 4") || lower.contains("dia 4")) return "🌃 ";
+        if (lower.contains("día 5") || lower.contains("dia 5")) return "🌙 ";
+        if (lower.contains("día 6") || lower.contains("dia 6")) return "⭐ ";
+        if (lower.contains("día 7") || lower.contains("dia 7")) return "🎆 ";
+        if (lower.contains("día")   || lower.contains("dia"))   return "📅 ";
+        if (lower.contains("mañana"))  return "🌄 ";
+        if (lower.contains("tarde"))   return "🌇 ";
+        if (lower.contains("noche"))   return "🌙 ";
+        return "📍 ";
     }
 
     /**
-     * Limpia caracteres de formato Markdown no deseados
+     * Limpia el markdown residual que la IA a veces incluye
+     * (triples backticks, líneas de solo guiones, etc.)
      */
     public static String cleanMarkdown(String text) {
         if (text == null) return "";
-
         return text
-                .replace("```", "")
-                .replace("`", "")
+                .replaceAll("```[a-zA-Z]*\\n?", "")  // bloques de código
+                .replaceAll("---+", "")               // líneas de guiones
+                .replaceAll("===+", "")               // líneas de iguales
                 .trim();
     }
 }

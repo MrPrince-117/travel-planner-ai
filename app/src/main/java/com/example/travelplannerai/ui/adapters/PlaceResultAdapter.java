@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.travelplannerai.R;
-import com.example.travelplannerai.data.api.FoursquareManager;
+import com.example.travelplannerai.data.api.NominatimManager;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.List;
@@ -17,13 +17,13 @@ import java.util.List;
 public class PlaceResultAdapter extends RecyclerView.Adapter<PlaceResultAdapter.ViewHolder> {
 
     public interface OnPlaceActionListener {
-        void onAddPlace(FoursquareManager.Place place);
+        void onAddPlace(NominatimManager.Place place);
     }
 
-    private final List<FoursquareManager.Place> places;
-    private final OnPlaceActionListener         listener;
+    private final List<NominatimManager.Place> places;
+    private final OnPlaceActionListener        listener;
 
-    public PlaceResultAdapter(List<FoursquareManager.Place> places,
+    public PlaceResultAdapter(List<NominatimManager.Place> places,
                               OnPlaceActionListener listener) {
         this.places   = places;
         this.listener = listener;
@@ -39,7 +39,7 @@ public class PlaceResultAdapter extends RecyclerView.Adapter<PlaceResultAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        FoursquareManager.Place place = places.get(position);
+        NominatimManager.Place place = places.get(position);
 
         holder.tvName.setText(place.name);
         holder.tvAddress.setText(
@@ -58,7 +58,7 @@ public class PlaceResultAdapter extends RecyclerView.Adapter<PlaceResultAdapter.
     public int getItemCount() { return places.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView     tvName, tvAddress, tvRating;
+        TextView       tvName, tvAddress, tvRating;
         MaterialButton btnAdd;
 
         ViewHolder(@NonNull View itemView) {

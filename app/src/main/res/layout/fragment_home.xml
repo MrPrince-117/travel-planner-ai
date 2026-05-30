@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- fragment_home.xml -->
-<!-- DESCRIPCIÓN: Pantalla principal de la aplicación rediseñada con el estilo Neo-Brutalist: buscador marcado, tarjetas de estadísticas de resumen, acciones rápidas premium y RecyclerViews para viajes. -->
-
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -17,7 +14,7 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- HEADER CON GREETING -->
+        <!-- HEADER -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,7 +48,6 @@
                     android:layout_marginTop="2dp" />
             </LinearLayout>
 
-            <!-- Imagen de Perfil Circular con Borde Brutalista -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivHomeProfile"
                 android:layout_width="48dp"
@@ -67,7 +63,7 @@
                 android:contentDescription="Perfil de usuario" />
         </RelativeLayout>
 
-        <!-- BARRA DE BÚSQUEDA NEO-BRUTALISTA -->
+        <!-- BARRA DE BÚSQUEDA -->
         <LinearLayout
             android:id="@+id/layoutSearchBar"
             android:layout_width="match_parent"
@@ -85,7 +81,7 @@
                 android:layout_height="20dp"
                 android:src="@android:drawable/ic_menu_search"
                 app:tint="@color/neo_black"
-                android:contentDescription="Icono de búsqueda" />
+                android:contentDescription="Búsqueda" />
 
             <TextView
                 android:layout_width="0dp"
@@ -98,7 +94,7 @@
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
 
-        <!-- TARJETAS DE ESTADÍSTICAS EN LA PARTE SUPERIOR -->
+        <!-- ESTADÍSTICAS -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="80dp"
@@ -106,7 +102,6 @@
             android:weightSum="3"
             android:layout_marginBottom="28dp">
 
-            <!-- Card 1: Viajes -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -114,22 +109,20 @@
                 android:layout_marginEnd="5dp"
                 android:background="@drawable/bg_stats_card_pink"
                 android:padding="6dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center">
-
                     <TextView
+                        android:id="@+id/tvStatsTrips"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="8"
+                        android:text="—"
                         android:textColor="@color/neo_black"
                         android:textSize="18sp"
                         android:fontFamily="sans-serif-black"
                         android:textStyle="bold" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -140,7 +133,6 @@
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Card 2: Lugares -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -148,33 +140,30 @@
                 android:layout_marginHorizontal="2.5dp"
                 android:background="@drawable/bg_stats_card_yellow"
                 android:padding="6dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center">
-
                     <TextView
+                        android:id="@+id/tvStatsFavorites"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="14"
+                        android:text="—"
                         android:textColor="@color/neo_black"
                         android:textSize="18sp"
                         android:fontFamily="sans-serif-black"
                         android:textStyle="bold" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Lugares"
+                        android:text="Favoritos"
                         android:textColor="@color/neo_black"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-bold" />
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Card 3: Ahorrado -->
             <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
@@ -182,35 +171,32 @@
                 android:layout_marginStart="5dp"
                 android:background="@drawable/bg_stats_card_green"
                 android:padding="6dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center">
-
                     <TextView
+                        android:id="@+id/tvStatsExcursions"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1.2K €"
+                        android:text="—"
                         android:textColor="@color/neo_black"
-                        android:textSize="16sp"
+                        android:textSize="18sp"
                         android:fontFamily="sans-serif-black"
                         android:textStyle="bold" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ahorrado"
+                        android:text="Presupuesto"
                         android:textColor="@color/neo_black"
                         android:textSize="10sp"
                         android:fontFamily="sans-serif-bold" />
                 </LinearLayout>
             </FrameLayout>
-
         </LinearLayout>
 
-        <!-- SECCIÓN: PRÓXIMOS VIAJES -->
+        <!-- PRÓXIMOS VIAJES -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -251,7 +237,7 @@
             tools:listitem="@layout/item_trip_card"
             android:layout_marginBottom="28dp" />
 
-        <!-- SECCIÓN: ACCIONES RÁPIDAS (BOTONES GRANDES) -->
+        <!-- ACCIONES RÁPIDAS -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -269,7 +255,6 @@
             android:weightSum="3"
             android:layout_marginBottom="28dp">
 
-            <!-- Crear Viaje -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/btnQuickCreate"
                 android:layout_width="0dp"
@@ -283,22 +268,19 @@
                 app:cardBackgroundColor="@color/white"
                 app:strokeColor="@color/neo_black"
                 app:strokeWidth="2dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="8dp">
-
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@android:drawable/ic_input_add"
                         app:tint="@color/primary_blue"
                         android:layout_marginBottom="6dp"
-                        android:contentDescription="Icono crear viaje" />
-
+                        android:contentDescription="Crear viaje" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -310,7 +292,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Buscar -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/btnQuickSearch"
                 android:layout_width="0dp"
@@ -324,22 +305,19 @@
                 app:cardBackgroundColor="@color/white"
                 app:strokeColor="@color/neo_black"
                 app:strokeWidth="2dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="8dp">
-
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@android:drawable/ic_menu_search"
                         app:tint="@color/primary_green"
                         android:layout_marginBottom="6dp"
-                        android:contentDescription="Icono buscar" />
-
+                        android:contentDescription="Buscar" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -351,7 +329,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- IA -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/btnQuickChat"
                 android:layout_width="0dp"
@@ -365,22 +342,19 @@
                 app:cardBackgroundColor="@color/white"
                 app:strokeColor="@color/neo_black"
                 app:strokeWidth="2dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:padding="8dp">
-
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@android:drawable/stat_notify_chat"
                         app:tint="@color/primary_purple"
                         android:layout_marginBottom="6dp"
-                        android:contentDescription="Icono IA" />
-
+                        android:contentDescription="IA" />
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -393,24 +367,209 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- SECCIÓN: PLANES GUARDADOS / ACTIVIDAD RECIENTE -->
+        <!-- ── TU PRÓXIMO VIAJE ────────────────────────────────────── -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tus Planes Guardados"
+            android:text="Tu Próximo Viaje"
             android:textColor="@color/neo_black"
             android:textSize="18sp"
             android:fontFamily="sans-serif-black"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="12dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvRecentActivity"
+        <!-- Card visible cuando hay viaje -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardNextTrip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_trip" />
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Imagen del destino -->
+                <ImageView
+                    android:id="@+id/ivNextTripImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_launcher_background"
+                    android:contentDescription="Imagen del próximo viaje" />
+
+                <!-- Overlay de información -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#FFFFFF"
+                    android:padding="16dp">
+
+                    <!-- Destino y días restantes -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:id="@+id/tvNextTripDestination"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="París"
+                            android:textColor="@color/neo_black"
+                            android:textSize="22sp"
+                            android:fontFamily="sans-serif-black"
+                            android:textStyle="bold" />
+
+                        <!-- Badge días restantes -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_stats_card_pink"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/tvNextTripDays"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="5"
+                                android:textColor="@color/neo_black"
+                                android:textSize="18sp"
+                                android:fontFamily="sans-serif-black"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="días"
+                                android:textColor="@color/neo_black"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Fila de métricas -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <!-- Fechas -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="📅 Fechas"
+                                android:textColor="#7A7A7A"
+                                android:textSize="11sp" />
+                            <TextView
+                                android:id="@+id/tvNextTripDates"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="15-22 Jun"
+                                android:textColor="@color/neo_black"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Presupuesto -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💰 Presupuesto"
+                                android:textColor="#7A7A7A"
+                                android:textSize="11sp" />
+                            <TextView
+                                android:id="@+id/tvNextTripBudget"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="1.500€"
+                                android:textColor="@color/neo_pink"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Presupuesto Total -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="💸 Total viajes"
+                                android:textColor="#7A7A7A"
+                                android:textSize="11sp" />
+                            <TextView
+                                android:id="@+id/tvNextTripTotalBudget"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="—"
+                                android:textColor="@color/neo_black"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Estado vacío cuando no hay viajes -->
+        <LinearLayout
+            android:id="@+id/layoutNoNextTrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#FFFFFF"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✈️"
+                android:textSize="40sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¡Crea tu primer viaje!"
+                android:textColor="@color/neo_black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pulsa en Crear viaje para empezar a planificar"
+                android:textColor="#7A7A7A"
+                android:textSize="13sp"
+                android:gravity="center"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
