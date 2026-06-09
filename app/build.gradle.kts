@@ -22,12 +22,13 @@ android {
         val localProps = Properties()
         localProps.load(rootProject.file("local.properties").inputStream())
 
-        val openAiKey     = localProps.getProperty("OPENAI_API_KEY",     "")
-        val unsplashKey   = localProps.getProperty("UNSPLASH_API_KEY",   "")
+        // ⚠️ Las API keys ya NO van en el APK — viven en Cloud Functions (backend proxy)
+        // Solo exponemos las URLs del proxy (que no son secretas)
+        val chatProxyUrl  = localProps.getProperty("CHAT_PROXY_URL",  "")
+        val photoProxyUrl = localProps.getProperty("PHOTO_PROXY_URL", "")
 
-
-        buildConfigField("String", "OPENAI_API_KEY",     "\"$openAiKey\"")
-        buildConfigField("String", "UNSPLASH_API_KEY",   "\"$unsplashKey\"")
+        buildConfigField("String", "CHAT_PROXY_URL",  "\"$chatProxyUrl\"")
+        buildConfigField("String", "PHOTO_PROXY_URL", "\"$photoProxyUrl\"")
 
     }
 

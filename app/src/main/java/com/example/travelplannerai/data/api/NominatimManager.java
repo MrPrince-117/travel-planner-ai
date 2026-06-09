@@ -36,6 +36,14 @@ public class NominatimManager {
         public double lat;
         public double lng;
 
+        /**
+         * URL de imagen cargada desde Unsplash.
+         * Se rellena la primera vez que el adapter la pide y se cachea aquí,
+         * así el scroll no repite llamadas a la API.
+         * null = todavía no se ha buscado, "" = se buscó pero no se encontró.
+         */
+        public String imageUrl = null;
+
         public Place(String name, String address, String category, double lat, double lng) {
             this.name     = name;
             this.address  = address;

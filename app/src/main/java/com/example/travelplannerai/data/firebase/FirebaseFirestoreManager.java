@@ -28,6 +28,7 @@ public class FirebaseFirestoreManager {
     public static final String COLLECTION_FAVORITES    = "favorites";
     public static final String COLLECTION_PARTICIPANTS = "participants";
     public static final String COLLECTION_AI_CHATS     = "ai_chats";
+    public static final String COLLECTION_SAVED_PLACES = "saved_places";
 
     private FirebaseFirestoreManager() {
         db = FirebaseFirestore.getInstance();
@@ -156,5 +157,22 @@ public class FirebaseFirestoreManager {
 
     public Task<Void> removeFromFavorites(String favoriteId) {
         return deleteDocument(COLLECTION_FAVORITES, favoriteId);
+    }
+
+    // ==================== LUGARES GUARDADOS ====================
+
+    /** Devuelve todos los lugares guardados por el usuario. */
+    public Task<QuerySnapshot> getUserSavedPlaces(String userId) {
+        return getDocumentsWhere(COLLECTION_SAVED_PLACES, "userId", userId);
+    }
+
+    /** Guarda un lugar en la colección saved_places. */
+    public Task<DocumentReference> savePlace(Map<String, Object> placeData) {
+        return addDocument(COLLECTION_SAVED_PLACES, placeData);
+    }
+
+    /** Elimina un lugar guardado por su ID de documento. */
+    public Task<Void> deletePlace(String placeId) {
+        return deleteDocument(COLLECTION_SAVED_PLACES, placeId);
     }
 }

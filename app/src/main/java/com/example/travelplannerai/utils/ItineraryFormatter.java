@@ -1,5 +1,6 @@
 package com.example.travelplannerai.utils;
 
+import android.content.Context;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -8,18 +9,43 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 
+import androidx.core.content.ContextCompat;
+
+import com.example.travelplannerai.R;
+
 /**
  * Formatea el texto markdown del itinerario generado por IA
  * en un texto visualmente rico usando Spannable.
+ *
+ * Los colores de TÍTULO, CUERPO y SEPARADOR se resuelven desde los recursos
+ * de color (sensibles al tema claro/oscuro) para que el itinerario siga
+ * siendo legible en ambos modos. Los acentos (día rosa, sección azul,
+ * bullets rosa) son fijos porque contrastan bien sobre cualquier fondo.
  */
 public class ItineraryFormatter {
 
-    // Colores neo-brutal de la app
-    private static final int COLOR_TITLE    = 0xFF000000; // Negro — títulos principales
+    // Acentos fijos (legibles sobre fondo claro u oscuro)
     private static final int COLOR_DAY      = 0xFFFF1493; // Rosa neo — encabezado de día
     private static final int COLOR_SECTION  = 0xFF1E88E5; // Azul — secciones
-    private static final int COLOR_BODY     = 0xFF333333; // Gris oscuro — texto normal
     private static final int COLOR_BULLET   = 0xFFFF1493; // Rosa — bullets
+
+    // Colores sensibles al tema (se rellenan en format() desde recursos)
+    private static int COLOR_TITLE     = 0xFF1A1D24; // títulos / negrita
+    private static int COLOR_BODY      = 0xFF333333; // texto normal
+    private static int COLOR_SEPARATOR = 0xFFCCCCCC; // línea separadora de día
+
+    /**
+     * Versión sensible al tema. Resuelve los colores de texto desde los
+     * recursos (claro/oscuro) usando el Context proporcionado.
+     */
+    public static SpannableStringBuilder format(String rawText, Context context) {
+        if (context != null) {
+            COLOR_TITLE     = ContextCompat.getColor(context, R.color.neo_black);
+            COLOR_BODY      = ContextCompat.getColor(context, R.color.text_dark);
+            COLOR_SEPARATOR = ContextCompat.getColor(context, R.color.app_divider);
+        }
+        return format(rawText);
+    }
 
     public static SpannableStringBuilder format(String rawText) {
         if (rawText == null || rawText.isEmpty())
@@ -65,8 +91,8 @@ public class ItineraryFormatter {
                 sb.append(emoji).append(text).append("\n\n");
                 applyStyle(sb, sepEnd, sb.length() - 2,
                         COLOR_DAY, 1.25f, Typeface.BOLD);
-                // Separador en gris claro
-                applyColor(sb, start, start + 17, 0xFFCCCCCC);
+                // Separador en gris (sensible al tema)
+                applyColor(sb, start, start + 17, COLOR_SEPARATOR);
 
                 // ── H4: #### Subsección ──────────────────────────────────────
             } else if (line.startsWith("#### ")) {

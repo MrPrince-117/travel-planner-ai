@@ -96,7 +96,13 @@
         android:id="@+id/chatFragment"
         android:name="com.example.travelplannerai.ui.chat.ChatFragment"
         android:label="Asistente IA"
-        tools:layout="@layout/fragment_ai_chat" />
+        tools:layout="@layout/fragment_ai_chat">
+        <action
+            android:id="@+id/action_chatFragment_to_myTripsFragment"
+            app:destination="@id/myTripsFragment"
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
 
     <fragment
         android:id="@+id/configurationFragment"

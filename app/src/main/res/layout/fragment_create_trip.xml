@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFDF6"
+    android:background="@color/neo_bg"
     android:fillViewport="true">
 
     <LinearLayout
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Planifica tu Aventura"
-                android:textColor="#000000"
+                android:textColor="@color/neo_black"
                 android:textSize="26sp"
                 android:fontFamily="sans-serif-black"
                 android:textStyle="bold" />
@@ -49,7 +49,7 @@
             android:layout_marginBottom="24dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/app_surface">
 
             <ImageView
                 android:id="@+id/ivCityPreview"
@@ -67,8 +67,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="¿A dónde vamos?"
-            app:boxStrokeColor="#000000"
-            app:hintTextColor="#7A7A7A"
+            app:boxStrokeColor="@color/neo_black"
+            app:hintTextColor="@color/text_muted"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
@@ -79,7 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textCapWords"
-                android:textColor="#000000" />
+                android:textColor="@color/neo_black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Presupuesto -->
@@ -89,8 +89,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Presupuesto estimado (€)"
-            app:boxStrokeColor="#000000"
-            app:hintTextColor="#7A7A7A"
+            app:boxStrokeColor="@color/neo_black"
+            app:hintTextColor="@color/text_muted"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
@@ -101,7 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
-                android:textColor="#000000" />
+                android:textColor="@color/neo_black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Fecha Inicio -->
@@ -111,8 +111,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Fecha de Inicio"
-            app:boxStrokeColor="#000000"
-            app:hintTextColor="#7A7A7A"
+            app:boxStrokeColor="@color/neo_black"
+            app:hintTextColor="@color/text_muted"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
@@ -125,7 +125,7 @@
                 android:focusable="false"
                 android:clickable="true"
                 android:cursorVisible="false"
-                android:textColor="#000000" />
+                android:textColor="@color/neo_black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Fecha Fin -->
@@ -135,8 +135,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
             android:hint="Fecha de Fin"
-            app:boxStrokeColor="#000000"
-            app:hintTextColor="#7A7A7A"
+            app:boxStrokeColor="@color/neo_black"
+            app:hintTextColor="@color/text_muted"
             app:boxCornerRadiusTopStart="16dp"
             app:boxCornerRadiusTopEnd="16dp"
             app:boxCornerRadiusBottomStart="16dp"
@@ -149,7 +149,7 @@
                 android:focusable="false"
                 android:clickable="true"
                 android:cursorVisible="false"
-                android:textColor="#000000" />
+                android:textColor="@color/neo_black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <ProgressBar
@@ -159,17 +159,17 @@
             android:layout_gravity="center"
             android:layout_marginBottom="16dp"
             android:visibility="gone"
-            android:indeterminateTint="#FF1493" />
+            android:indeterminateTint="@color/neo_pink" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSaveTrip"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="GUARDAR VIAJE"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:backgroundTint="#FF1493"
+            app:backgroundTint="@color/neo_pink"
             app:cornerRadius="16dp"
             android:stateListAnimator="@null" />
 

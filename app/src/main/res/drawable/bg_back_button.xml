@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Botón de atrás sobre imagen: fondo oscuro semitransparente + flecha blanca.
+     Patrón estándar (YouTube, Maps…) que garantiza visibilidad
+     sobre cualquier foto, en tema claro u oscuro. -->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#44FFFFFF">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#88000000" />
+        </shape>
+    </item>
+</ripple>

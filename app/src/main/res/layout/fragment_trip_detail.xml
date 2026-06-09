@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/neo_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,31 +30,31 @@
                 android:layout_gravity="top"
                 android:background="@drawable/gradient_top_dark" />
 
-            <!-- Botón Atrás -->
+            <!-- Botón Atrás: fondo oscuro semitransparente + flecha blanca -->
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:layout_gravity="top|start"
                 android:layout_margin="16dp"
-                android:background="#CCFFFFFF"
+                android:background="@drawable/bg_back_button"
                 android:contentDescription="Volver"
-                android:padding="8dp"
+                android:padding="10dp"
                 android:src="@drawable/ic_arrow_back"
-                app:tint="@color/neo_black" />
+                app:tint="@color/white" />
 
-            <!-- Botón Favorito -->
+            <!-- Botón Favorito: mismo estilo -->
             <ImageButton
                 android:id="@+id/btnFavorite"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:layout_gravity="top|end"
                 android:layout_margin="16dp"
-                android:background="#CCFFFFFF"
+                android:background="@drawable/bg_back_button"
                 android:contentDescription="Guardar en favoritos"
-                android:padding="8dp"
+                android:padding="10dp"
                 android:src="@drawable/ic_heart"
-                app:tint="@color/neo_pink" />
+                app:tint="@color/white" />
 
         </FrameLayout>
 
@@ -72,7 +72,7 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/app_surface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -85,7 +85,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Destino"
-                        android:textColor="#000000"
+                        android:textColor="@color/neo_black"
                         android:textSize="26sp"
                         android:fontFamily="sans-serif-black"
                         android:textStyle="bold" />
@@ -96,7 +96,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:text="Fechas"
-                        android:textColor="#666666"
+                        android:textColor="@color/text_muted"
                         android:textSize="14sp" />
 
                     <TextView
@@ -123,7 +123,7 @@
                             android:layout_weight="1"
                             android:layout_marginEnd="8dp"
                             android:text="✏️  Editar"
-                            android:textColor="@color/neo_black"
+                            android:textColor="@color/ink_fixed"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             app:backgroundTint="@color/neo_yellow"
@@ -165,7 +165,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="🗺️ Excursiones"
-                    android:textColor="#000000"
+                    android:textColor="@color/neo_black"
                     android:textSize="18sp"
                     android:fontFamily="sans-serif-black"
                     android:textStyle="bold" />
@@ -197,7 +197,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:text="✨ Itinerario sugerido por IA"
-                android:textColor="#000000"
+                android:textColor="@color/neo_black"
                 android:textSize="18sp"
                 android:fontFamily="sans-serif-black"
                 android:textStyle="bold" />
@@ -216,7 +216,7 @@
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="#FFFFFF">
+                app:cardBackgroundColor="@color/app_surface">
 
                 <TextView
                     android:id="@+id/tvItineraryResult"
@@ -226,7 +226,7 @@
                     android:lineSpacingMultiplier="1.4"
                     android:padding="16dp"
                     android:text="Esperando itinerario..."
-                    android:textColor="#333333"
+                    android:textColor="@color/text_dark"
                     android:textSize="14sp" />
             </androidx.cardview.widget.CardView>
 

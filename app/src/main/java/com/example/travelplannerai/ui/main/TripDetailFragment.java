@@ -135,7 +135,8 @@ public class TripDetailFragment extends Fragment {
                             pbGeneratingItinerary.setVisibility(View.GONE);
                             tvItineraryResult.setText(
                                     ItineraryFormatter.format(
-                                            ItineraryFormatter.cleanMarkdown(cached)));
+                                            ItineraryFormatter.cleanMarkdown(cached),
+                                            tvItineraryResult.getContext()));
                         } else {
                             Log.d(TAG, "🤖 Sin caché, generando itinerario con IA...");
                             generateAndSaveItinerary(currentTrip);
@@ -196,7 +197,8 @@ public class TripDetailFragment extends Fragment {
                             if (!isAdded()) return;
                             pbGeneratingItinerary.setVisibility(View.GONE);
                             String cleaned = ItineraryFormatter.cleanMarkdown(response);
-                            tvItineraryResult.setText(ItineraryFormatter.format(cleaned));
+                            tvItineraryResult.setText(ItineraryFormatter.format(cleaned,
+                                    tvItineraryResult.getContext()));
                             saveItineraryToFirestore(response);
                         });
                     }

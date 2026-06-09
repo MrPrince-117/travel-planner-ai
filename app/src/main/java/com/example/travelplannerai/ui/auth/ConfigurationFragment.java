@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.example.travelplannerai.R;
 import com.example.travelplannerai.data.firebase.FirebaseAuthManager;
 import com.example.travelplannerai.data.firebase.FirebaseFirestoreManager;
+import com.example.travelplannerai.utils.ThemeManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,6 +36,7 @@ public class ConfigurationFragment extends Fragment {
     private MaterialButton btnSaveName, btnLogout;
     private LinearLayout   optionChangePassword, optionDeleteAccount;
     private SwitchCompat   switchNotifications;
+    private SwitchCompat   switchDarkTheme;
 
     public ConfigurationFragment() { }
 
@@ -59,6 +61,7 @@ public class ConfigurationFragment extends Fragment {
         optionChangePassword = view.findViewById(R.id.optionChangePassword);
         optionDeleteAccount  = view.findViewById(R.id.optionDeleteAccount);
         switchNotifications  = view.findViewById(R.id.switchNotifications);
+        switchDarkTheme      = view.findViewById(R.id.switchDarkTheme);
 
         // Cargar datos
         loadUserProfile();
@@ -82,7 +85,34 @@ public class ConfigurationFragment extends Fragment {
                         isChecked ? "Notificaciones activadas" : "Notificaciones desactivadas",
                         Toast.LENGTH_SHORT).show());
 
+        // Switch de tema oscuro
+        setupThemeSwitch();
+
         return view;
+    }
+
+    // ==================== TEMA (CLARO / OSCURO) ====================
+
+    /**
+     * Inicializa el switch de tema oscuro:
+     *  - Refleja el estado guardado (sin disparar el listener).
+     *  - Al cambiarlo, guarda la preferencia y la aplica al instante.
+     *    AppCompatDelegate recrea la Activity automáticamente para
+     *    repintar la app con el nuevo tema.
+     */
+    private void setupThemeSwitch() {
+        if (switchDarkTheme == null || getContext() == null) return;
+
+        // Marcar el estado actual sin que salte el listener
+        switchDarkTheme.setOnCheckedChangeListener(null);
+        switchDarkTheme.setChecked(ThemeManager.isDark(getContext()));
+
+        switchDarkTheme.setOnCheckedChangeListener((btn, isChecked) -> {
+            if (getContext() == null) return;
+            ThemeManager.setMode(getContext(),
+                    isChecked ? ThemeManager.MODE_DARK : ThemeManager.MODE_LIGHT);
+            // No hace falta recrear manualmente: setDefaultNightMode lo gestiona.
+        });
     }
 
     // ==================== PERFIL ====================

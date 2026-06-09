@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/sort_date_asc"    android:title="📅 Fecha más próxima" />
+    <item android:id="@+id/sort_date_desc"   android:title="📅 Fecha más lejana" />
+    <item android:id="@+id/sort_name_az"     android:title="🔤 Destino A → Z" />
+    <item android:id="@+id/sort_name_za"     android:title="🔤 Destino Z → A" />
+    <item android:id="@+id/sort_budget_high" android:title="💰 Mayor presupuesto" />
+    <item android:id="@+id/sort_budget_low"  android:title="💰 Menor presupuesto" />
+    <item android:id="@+id/sort_recent"      android:title="🕒 Más reciente primero" />
+</menu>

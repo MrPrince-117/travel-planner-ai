@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ════════════════════════════════════════════════════════════════
+         TEMA OSCURO — solo se redefinen los colores SEMÁNTICOS.
+         Los fijos (white, black, ink_fixed, acentos) se heredan de
+         values/colors.xml, así que se mantienen idénticos.
+         ════════════════════════════════════════════════════════════════ -->
+
+    <!-- Fondos -->
+    <color name="neo_bg">#121212</color>          <!-- fondo de pantalla -->
+    <color name="app_surface">#1E1F22</color>     <!-- tarjetas / superficies -->
+    <color name="app_surface_variant">#2A2B2F</color>
+    <color name="card_bg">#1E1F22</color>
+    <color name="bg_light">#121212</color>
+
+    <!-- Tinta principal (ahora clara para contraste sobre fondos oscuros) -->
+    <color name="neo_black">#ECECEC</color>
+    <color name="neo_white">#1E1F22</color>       <!-- superficies neo oscurecidas -->
+
+    <!-- Texto -->
+    <color name="text_dark">#ECECEC</color>
+    <color name="text_muted">#B0B3B8</color>
+
+    <!-- Bordes y separadores -->
+    <color name="app_stroke">#3A3B3F</color>
+    <color name="app_divider">#2C2D31</color>
+
+    <!-- Fondos pastel para iconos (versión oscura tenue) -->
+    <color name="icon_bg_blue">#1B2A3A</color>
+    <color name="icon_bg_green">#14241D</color>
+    <color name="icon_bg_purple">#241A2E</color>
+</resources>

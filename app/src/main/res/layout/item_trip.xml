@@ -7,7 +7,7 @@
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="4dp"
-    app:cardBackgroundColor="#FFFFFF">
+    app:cardBackgroundColor="@color/app_surface">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Destino"
-                android:textColor="#000000"
+                android:textColor="@color/neo_black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -52,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Fechas"
-                android:textColor="#7A7A7A"
+                android:textColor="@color/text_muted"
                 android:textSize="14sp" />
 
             <TextView
@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Presupuesto"
-                android:textColor="#FF1493"
+                android:textColor="@color/neo_pink"
                 android:textSize="14sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -78,7 +78,7 @@
                 android:layout_height="32dp"
                 android:padding="4dp"
                 android:src="@android:drawable/ic_menu_delete"
-                app:tint="#7A7A7A"
+                app:tint="@color/text_muted"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
@@ -88,7 +88,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_media_play"
-                app:tint="#FF1493" />
+                app:tint="@color/neo_pink" />
         </LinearLayout>
 
     </LinearLayout>

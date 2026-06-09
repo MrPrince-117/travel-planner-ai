@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/neo_bg">
 
-    <!-- Cabecera -->
+    <!-- ── Cabecera ── -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,16 +16,18 @@
         android:textSize="26sp"
         android:fontFamily="sans-serif-black"
         android:textStyle="bold"
-        android:padding="16dp" />
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp" />
 
-    <!-- Buscador -->
+    <!-- ── Buscador ── -->
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="12dp"
-        android:hint="Busca lugares, ciudades..."
+        android:layout_marginBottom="8dp"
+        android:hint="Ciudad o lugar... (ej: París, Roma)"
         app:boxStrokeColor="@color/neo_black"
         app:boxStrokeWidth="2dp"
         app:boxCornerRadiusTopStart="16dp"
@@ -44,56 +47,227 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Chips de filtro -->
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipGroupFilters"
+    <!-- ── Búsquedas recientes (oculto por defecto) ── -->
+    <LinearLayout
+        android:id="@+id/layoutRecents"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="12dp"
-        app:singleSelection="true"
-        app:selectionRequired="false">
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="4dp"
+        android:visibility="gone">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipHotels"
-            style="@style/Widget.Material3.Chip.Filter"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hoteles" />
+            android:text="Búsquedas recientes"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"
+            android:layout_marginBottom="6dp" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipRestaurants"
-            style="@style/Widget.Material3.Chip.Filter"
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupRecents"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleLine="true" />
+
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <!-- ── Categorías (scroll horizontal) ── -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Categoría"
+        android:textColor="@color/text_muted"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.08"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="6dp" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="10dp"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupFilters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Restaurantes" />
+            app:singleSelection="true"
+            app:selectionRequired="false">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipMuseums"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Museos" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipHotels"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏨 Hoteles" />
 
-    </com.google.android.material.chip.ChipGroup>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipRestaurants"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🍽️ Restaurantes" />
 
-    <!-- ProgressBar -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMuseums"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏛️ Museos" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipBeaches"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏖️ Playas" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipParks"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🌳 Parques" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMonuments"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🗿 Monumentos" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAttractions"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎡 Atracciones" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipShopping"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🛍️ Compras" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAirports"
+                style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✈️ Aeropuertos" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <!-- ── ProgressBar ── -->
     <ProgressBar
         android:id="@+id/progressBarPlaces"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
         android:indeterminateTint="@color/neo_pink"
         android:visibility="gone" />
 
-    <!-- Lista de resultados -->
+    <!-- ── Estado vacío inicial (antes de buscar) ── -->
+    <LinearLayout
+        android:id="@+id/layoutEmptyInitial"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌍"
+            android:textSize="56sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Busca tu próximo destino"
+            android:textColor="@color/neo_black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Escribe una ciudad y elige una categoría"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- ── Estado sin resultados (tras buscar sin éxito) ── -->
+    <LinearLayout
+        android:id="@+id/layoutEmptyResults"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔍"
+            android:textSize="52sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Sin resultados"
+            android:textColor="@color/neo_black"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvEmptyQuery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:gravity="center"
+            tools:text="Prueba con otra ciudad o categoría" />
+
+    </LinearLayout>
+
+    <!-- ── Lista de resultados ── -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPlaceResults"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="4dp"
-        android:clipToPadding="false" />
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
+        android:visibility="gone" />
 
 </LinearLayout>

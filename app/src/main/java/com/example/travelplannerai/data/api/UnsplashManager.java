@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.example.travelplannerai.BuildConfig;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
@@ -16,20 +15,21 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-
 /**
- * Singleton Manager para Unsplash API
- * Obtiene fotos automáticas de ciudades
+ * Manager para obtener fotos de lugares/ciudades.
+ *
+ * Las llamadas a Unsplash se realizan a través del Cloud Function proxy.
+ * La API key de Unsplash NUNCA está en el APK.
+ *
+ * Flujo:
+ *   App → [Firebase ID token] → Cloud Function (photoProxy) → Unsplash → URL
  */
 public class UnsplashManager {
 
     private static final String TAG = "UnsplashManager";
 
-
-    private static final String UNSPLASH_ACCESS_KEY = BuildConfig.UNSPLASH_API_KEY;
-
-    // Unsplash API Configuration
-    private static final String UNSPLASH_API_URL = "https://api.unsplash.com/search/photos";
+    /** URL del Cloud Function proxy (definida en local.properties → BuildConfig) */
+    private static final String PROXY_URL = BuildConfig.PHOTO_PROXY_URL;
 
     private static UnsplashManager instance;
     private final OkHttpClient httpClient;
@@ -41,55 +41,71 @@ public class UnsplashManager {
                 .writeTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
                 .build();
-
         gson = new Gson();
     }
 
     public static synchronized UnsplashManager getInstance() {
-        if (instance == null) {
-            instance = new UnsplashManager();
-        }
+        if (instance == null) instance = new UnsplashManager();
         return instance;
     }
 
+    // ── API pública ──────────────────────────────────────────────────────────
+
     /**
-     * Busca una foto de una ciudad en Unsplash
+     * Busca una foto de una ciudad (para tarjetas de viaje y portadas de trip).
      *
-     * @param city Nombre de la ciudad (ej: "París", "Tokyo")
-     * @param callback Callback con la URL de la foto
+     * @param city     Nombre de la ciudad (ej: "París", "Tokyo")
+     * @param callback Resultado con la URL de la foto
      */
     public void searchCityPhoto(String city, PhotoCallback callback) {
+        searchPhoto(city + " city landscape", callback);
+    }
 
-        // Validar API Key
-        if (UNSPLASH_ACCESS_KEY == null || UNSPLASH_ACCESS_KEY.isEmpty()
-                || UNSPLASH_ACCESS_KEY.equals("PEGA_TU_UNSPLASH_ACCESS_KEY_AQUI")) {
-            Log.e(TAG, "❌ UNSPLASH_ACCESS_KEY no está configurada!");
-            callback.onError("Error: Configura tu Unsplash API Key en UnsplashManager.java");
+    /**
+     * Búsqueda genérica por cualquier término.
+     * Usada por el adapter de resultados de Explorar Lugares.
+     *
+     * @param query    Texto de búsqueda (ej: "Hotel Regina Louvre hotel")
+     * @param callback Resultado con la URL de la foto
+     */
+    public void searchPhoto(String query, PhotoCallback callback) {
+        if (PROXY_URL == null || PROXY_URL.isEmpty()) {
+            callback.onError("PHOTO_PROXY_URL no configurada en local.properties");
             return;
         }
 
-        Log.d(TAG, "✅ API Key cargada (length: " + UNSPLASH_ACCESS_KEY.length() + ")");
+        // Obtener Firebase ID token y luego hacer la petición al proxy
+        TokenProvider.getToken(new TokenProvider.TokenCallback() {
+            @Override
+            public void onToken(String idToken) {
+                doRequest(query, idToken, callback);
+            }
 
-        // Construir URL de búsqueda
-        String query = city + " city landscape";
-        String encodedQuery = query.replace(" ", "%20");
-        String url = UNSPLASH_API_URL + "?query=" + encodedQuery + "&per_page=1&client_id=" + UNSPLASH_ACCESS_KEY;
+            @Override
+            public void onError(String error) {
+                callback.onError("Error de autenticación: " + error);
+            }
+        });
+    }
 
-        Log.d(TAG, "📤 Buscando foto de: " + city);
-        Log.d(TAG, "🔗 URL: " + url);
+    // ── Internals ────────────────────────────────────────────────────────────
 
-        // Crear request
+    private void doRequest(String query, String idToken, PhotoCallback callback) {
+        String encoded = encode(query);
+        String url = PROXY_URL + "?query=" + encoded;
+
+        Log.d(TAG, "📤 Buscando foto: " + query);
+
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Accept-Version", "v1")
+                .addHeader("Authorization", "Bearer " + idToken)
                 .build();
 
-        // Ejecutar async
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "❌ Error de red: " + e.getMessage(), e);
-                callback.onError("Error de conexión: " + e.getMessage());
+                Log.e(TAG, "❌ Error de red: " + e.getMessage());
+                callback.onError("Error de red: " + e.getMessage());
             }
 
             @Override
@@ -99,42 +115,35 @@ public class UnsplashManager {
                     callback.onError("Error HTTP: " + response.code());
                     return;
                 }
-
                 try {
-                    String responseBody = response.body().string();
-                    Log.d(TAG, "📥 Respuesta recibida");
+                    String body = response.body().string();
+                    JsonObject json = gson.fromJson(body, JsonObject.class);
 
-                    // Parsear JSON
-                    JsonObject jsonResponse = gson.fromJson(responseBody, JsonObject.class);
-                    JsonArray results = jsonResponse.getAsJsonArray("results");
-
-                    if (results == null || results.size() == 0) {
-                        Log.w(TAG, "⚠️ No se encontraron fotos");
-                        callback.onError("No se encontraron fotos para: " + city);
-                        return;
+                    // El proxy devuelve { "url": "https://..." } o { "url": null }
+                    if (json.has("url") && !json.get("url").isJsonNull()) {
+                        String photoUrl = json.get("url").getAsString();
+                        Log.d(TAG, "✅ Foto encontrada");
+                        callback.onSuccess(photoUrl);
+                    } else {
+                        Log.w(TAG, "⚠️ Sin resultados para: " + query);
+                        callback.onError("Sin resultados");
                     }
-
-                    // Obtener primera foto
-                    JsonObject photo = results.get(0).getAsJsonObject();
-                    JsonObject urls = photo.getAsJsonObject("urls");
-                    String photoUrl = urls.get("regular").getAsString();
-
-                    Log.d(TAG, "✅ Foto encontrada!");
-                    Log.d(TAG, "🖼️ URL: " + photoUrl);
-
-                    callback.onSuccess(photoUrl);
-
                 } catch (Exception e) {
-                    Log.e(TAG, "❌ Error parseando JSON: " + e.getMessage(), e);
-                    callback.onError("Error parseando respuesta: " + e.getMessage());
+                    Log.e(TAG, "❌ Error parseando respuesta: " + e.getMessage());
+                    callback.onError("Error al parsear respuesta");
                 }
             }
         });
     }
 
-    /**
-     * Callback para recibir la URL de la foto
-     */
+    private String encode(String text) {
+        try {
+            return java.net.URLEncoder.encode(text, "UTF-8");
+        } catch (Exception e) {
+            return text.replace(" ", "%20");
+        }
+    }
+
     public interface PhotoCallback {
         void onSuccess(String photoUrl);
         void onError(String error);

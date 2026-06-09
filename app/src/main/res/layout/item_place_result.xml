@@ -7,7 +7,7 @@
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="16dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/app_surface"
     app:strokeColor="@color/neo_black"
     app:strokeWidth="2dp"
     app:cardElevation="0dp">
@@ -77,7 +77,7 @@
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:src="@android:drawable/btn_star_big_on"
-                      app:tint="@color/neo_black" />
+                      app:tint="@color/ink_fixed" />
 
                 <TextView
                     android:id="@+id/tvPlaceRating"
@@ -85,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:text="4.8"
-                    android:textColor="@color/neo_black"
+                    android:textColor="@color/ink_fixed"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>

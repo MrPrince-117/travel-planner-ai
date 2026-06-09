@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/neo_bg">
 
-    <!-- Cabecera estilo neo-brutal -->
+    <!-- ── Cabecera ── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="14dp">
 
         <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:src="@drawable/ic_heart_filled"
-            android:layout_marginEnd="12dp" />
+            android:layout_marginEnd="10dp"
+            app:tint="@color/neo_pink"
+            android:contentDescription="Favoritos" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -30,9 +35,58 @@
 
     </LinearLayout>
 
-    <!-- Estado vacío (se oculta cuando hay favoritos) -->
+    <!-- ── Pestañas: Viajes / Lugares ── -->
     <LinearLayout
-        android:id="@+id/layoutEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/tabTrips"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="❤️ Viajes"
+            android:textSize="13sp"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/neo_pink"
+            app:strokeColor="@color/neo_pink"
+            app:strokeWidth="2dp"
+            app:cornerRadius="10dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/tabPlaces"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="📍 Lugares"
+            android:textSize="13sp"
+            android:textColor="@color/neo_black"
+            app:strokeColor="@color/neo_black"
+            app:strokeWidth="2dp"
+            app:cornerRadius="10dp" />
+
+    </LinearLayout>
+
+    <!-- ── ProgressBar compartido ── -->
+    <ProgressBar
+        android:id="@+id/progressBarFavorites"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:indeterminateTint="@color/neo_pink"
+        android:visibility="gone" />
+
+    <!-- ════════ TAB VIAJES ════════ -->
+
+    <!-- Estado vacío viajes -->
+    <LinearLayout
+        android:id="@+id/layoutEmptyTrips"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -41,49 +95,90 @@
         android:visibility="gone">
 
         <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:src="@drawable/ic_heart"
+            android:alpha="0.35"
             android:layout_marginBottom="16dp"
-            android:alpha="0.4" />
+            android:contentDescription="Sin favoritos" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Aún no tienes favoritos"
+            android:text="Aún no tienes viajes favoritos"
             android:textColor="@color/text_muted"
-            android:textSize="18sp"
-            android:fontFamily="sans-serif-medium" />
+            android:textSize="16sp"
+            android:gravity="center" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pulsa el corazón en un viaje para guardarlo aquí"
+            android:text="Pulsa ❤️ en el detalle de un viaje"
             android:textColor="@color/text_muted"
             android:textSize="13sp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="6dp"
             android:gravity="center"
             android:paddingHorizontal="32dp" />
 
     </LinearLayout>
 
-    <!-- ProgressBar de carga -->
-    <ProgressBar
-        android:id="@+id/progressBarFavorites"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminateTint="@color/neo_pink"
-        android:visibility="gone" />
-
-    <!-- Lista de favoritos -->
+    <!-- Lista viajes favoritos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvFavorites"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
-        android:clipToPadding="false" />
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
+        android:visibility="gone" />
+
+    <!-- ════════ TAB LUGARES ════════ -->
+
+    <!-- Estado vacío lugares -->
+    <LinearLayout
+        android:id="@+id/layoutEmptyPlaces"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📍"
+            android:textSize="56sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aún no tienes lugares guardados"
+            android:textColor="@color/text_muted"
+            android:textSize="16sp"
+            android:layout_marginTop="12dp"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Usa el botón + en Explorar Lugares"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:paddingHorizontal="32dp" />
+
+    </LinearLayout>
+
+    <!-- Lista lugares guardados -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSavedPlaces"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="80dp"
+        android:clipToPadding="false"
+        android:visibility="gone" />
 
 </LinearLayout>

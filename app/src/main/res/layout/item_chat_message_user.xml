@@ -3,26 +3,56 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp"
-    android:gravity="end">
+    android:orientation="horizontal"
+    android:gravity="end|bottom"
+    android:paddingStart="56dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
+    <!-- Burbuja del mensaje del usuario -->
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="64dp"
-        app:cardBackgroundColor="@color/primary_blue"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="2dp">
+        app:cardCornerRadius="18dp"
+        app:cardBackgroundColor="@color/neo_pink"
+        app:strokeColor="@color/neo_black"
+        app:strokeWidth="1.5dp"
+        app:cardElevation="0dp">
 
         <TextView
             android:id="@+id/tvUserMessage"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="12dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
             android:textColor="@color/white"
             android:textSize="15sp"
-            android:text="Mensaje del usuario"/>
+            android:lineSpacingExtra="3dp"
+            android:fontFamily="sans-serif-medium" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Avatar usuario: círculo azul pequeño -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="2dp"
+        app:cardCornerRadius="17dp"
+        app:cardBackgroundColor="@color/primary_blue"
+        app:strokeColor="@color/neo_black"
+        app:strokeWidth="1.5dp"
+        app:cardElevation="0dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="👤"
+            android:textSize="14sp" />
 
     </com.google.android.material.card.MaterialCardView>
 

@@ -3,11 +3,13 @@ package com.example.travelplannerai.data.ai;
 import android.util.Log;
 
 import com.example.travelplannerai.BuildConfig;
+import com.example.travelplannerai.data.api.TokenProvider;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -19,21 +21,23 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * Singleton Manager for OpenAI API (GPT-4o-mini)
- * Much more stable than Gemini!
+ * Manager para el chat conversacional de viajes.
+ *
+ * Las llamadas a OpenAI se realizan a través de un Cloud Function proxy
+ * que vive en Firebase. La API key de OpenAI NUNCA está en el APK.
+ *
+ * Flujo:
+ *   App → [Firebase ID token] → Cloud Function (chatProxy) → OpenAI → respuesta
  */
 public class OpenAIManager {
 
-    private static final String TAG = "OpenAIManager";
+    private static final String TAG   = "OpenAIManager";
+    private static final String MODEL = "gpt-4o-mini";
+    private static final MediaType JSON_MEDIA_TYPE =
+            MediaType.get("application/json; charset=utf-8");
 
-    // ⚠️ REPLACE WITH YOUR OPENAI API KEY ⚠️
-    // Get it from: https://platform.openai.com/api-keys
-    private static final String OPENAI_API_KEY = BuildConfig.OPENAI_API_KEY;
-
-    // OpenAI API Configuration
-    private static final String OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
-    private static final String MODEL = "gpt-4o-mini"; // Fast and cheap model
-    private static final MediaType JSON_MEDIA_TYPE = MediaType.get("application/json; charset=utf-8");
+    /** URL del Cloud Function proxy (definida en local.properties → BuildConfig) */
+    private static final String PROXY_URL = BuildConfig.CHAT_PROXY_URL;
 
     private static OpenAIManager instance;
     private final OkHttpClient httpClient;
@@ -45,195 +49,172 @@ public class OpenAIManager {
                 .writeTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .build();
-
         gson = new Gson();
     }
 
     public static synchronized OpenAIManager getInstance() {
-        if (instance == null) {
-            instance = new OpenAIManager();
-        }
+        if (instance == null) instance = new OpenAIManager();
         return instance;
     }
 
-    /**
-     * Send message to OpenAI GPT
-     *
-     * @param userMessage User's input message
-     * @param tripContext Optional context about the trip (can be null)
-     * @param callback Response callback
-     */
-    public void sendMessage(String userMessage, String tripContext, ResponseCallback callback) {
+    // ── System prompt ────────────────────────────────────────────────────────
 
-        // Validate API Key
-        if (OPENAI_API_KEY == null || OPENAI_API_KEY.isEmpty() || OPENAI_API_KEY.equals("PEGA_TU_OPENAI_KEY_AQUI")) {
-            Log.e(TAG, "❌ OPENAI_API_KEY is not configured!");
-            callback.onError("Error de configuración: Debes reemplazar OPENAI_API_KEY en OpenAIManager.java");
+    public static final String CHAT_SYSTEM_PROMPT =
+            "Eres Travel AI, un asistente experto en planificación de viajes integrado en la app TravelPlannerAI.\n\n" +
+
+            "## ESTILO DE CONVERSACIÓN\n" +
+            "- Respuestas CORTAS (máx 3-4 líneas). Nunca vuelques información masiva.\n" +
+            "- Haz UNA sola pregunta por mensaje.\n" +
+            "- Usa emojis con moderación (1-2 por respuesta).\n" +
+            "- Responde siempre en ESPAÑOL.\n" +
+            "- Sé cálido y cercano, como un amigo que viaja mucho.\n\n" +
+
+            "## PROCESO DE PLANIFICACIÓN\n" +
+            "Cuando el usuario quiera planificar un viaje, recopila estos datos UNO A UNO " +
+            "si no los ha proporcionado ya:\n" +
+            "  1. DESTINO (ciudad o región)\n" +
+            "  2. FECHA DE INICIO (formato dd/MM/yyyy)\n" +
+            "  3. FECHA DE FIN (formato dd/MM/yyyy)\n" +
+            "  4. PRESUPUESTO TOTAL estimado en euros (número entero)\n\n" +
+
+            "## CUANDO TENGAS TODOS LOS DATOS\n" +
+            "Muestra un breve resumen del viaje y añade EXACTAMENTE al final de tu respuesta " +
+            "(en la última línea, sin nada después) este marcador con JSON válido:\n" +
+            "[CREAR_VIAJE:{\"destination\":\"...\",\"startDate\":\"dd/MM/yyyy\"," +
+            "\"endDate\":\"dd/MM/yyyy\",\"budget\":1500}]\n\n" +
+
+            "Ejemplo de respuesta con marcador:\n" +
+            "¡Perfecto! Ya tengo todo para tu viaje a Calpe 🌊 Del 05/08/2025 al 12/08/2025 " +
+            "con un presupuesto de 1.200€. Pulsa el botón para crearlo en la app.\n" +
+            "[CREAR_VIAJE:{\"destination\":\"Calpe\",\"startDate\":\"05/08/2025\"," +
+            "\"endDate\":\"12/08/2025\",\"budget\":1200}]\n\n" +
+
+            "## OTRAS CONSULTAS\n" +
+            "Si el usuario pregunta algo sobre destinos, recomendaciones, clima, etc., " +
+            "responde brevemente y ofrece ayudarle a planificar un viaje a ese lugar.";
+
+    // ── API pública ──────────────────────────────────────────────────────────
+
+    /**
+     * Envía la conversación completa al proxy de Cloud Functions.
+     * El proxy añade la API key de OpenAI y reenvía la petición.
+     *
+     * @param history  Historial de mensajes (usuario + asistente), ordenados por tiempo.
+     * @param callback Resultado.
+     */
+    public void sendConversation(
+            List<com.example.travelplannerai.data.model.ChatMessage> history,
+            ResponseCallback callback) {
+
+        if (PROXY_URL == null || PROXY_URL.isEmpty()) {
+            callback.onError("CHAT_PROXY_URL no configurada en local.properties");
             return;
         }
 
-        Log.d(TAG, "✅ API Key loaded (length: " + OPENAI_API_KEY.length() + ")");
+        // Primero obtener el Firebase ID token del usuario actual
+        TokenProvider.getToken(new TokenProvider.TokenCallback() {
+            @Override
+            public void onToken(String idToken) {
+                doRequest(history, idToken, callback);
+            }
 
-        // Build system prompt
-        String systemPrompt = buildSystemPrompt(tripContext);
+            @Override
+            public void onError(String error) {
+                callback.onError("Error de autenticación: " + error);
+            }
+        });
+    }
 
-        // Build request JSON (OpenAI format)
-        JsonObject requestBody = buildOpenAIRequestBody(systemPrompt, userMessage);
+    // ── Internals ────────────────────────────────────────────────────────────
+
+    private void doRequest(
+            List<com.example.travelplannerai.data.model.ChatMessage> history,
+            String idToken,
+            ResponseCallback callback) {
+
+        // Construir el body igual que OpenAI espera (el proxy lo reenvía tal cual)
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("model", MODEL);
+
+        JsonArray messages = new JsonArray();
+
+        // System prompt
+        JsonObject sys = new JsonObject();
+        sys.addProperty("role", "system");
+        sys.addProperty("content", CHAT_SYSTEM_PROMPT);
+        messages.add(sys);
+
+        // Historial completo
+        for (com.example.travelplannerai.data.model.ChatMessage msg : history) {
+            String role = msg.getRole();
+            if (!"user".equals(role) && !"assistant".equals(role)) continue;
+            JsonObject m = new JsonObject();
+            m.addProperty("role", role);
+            m.addProperty("content", msg.getContent());
+            messages.add(m);
+        }
+
+        requestBody.add("messages", messages);
+        requestBody.addProperty("temperature", 0.8);
+        requestBody.addProperty("max_tokens", 400);
+
         String jsonBody = gson.toJson(requestBody);
 
-        Log.d(TAG, "📤 Sending request to OpenAI");
-        Log.d(TAG, "📦 Request body: " + jsonBody);
-
-        // Create HTTP POST request
         Request request = new Request.Builder()
-                .url(OPENAI_API_URL)
+                .url(PROXY_URL)
                 .post(RequestBody.create(jsonBody, JSON_MEDIA_TYPE))
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer " + OPENAI_API_KEY)
+                .addHeader("Authorization", "Bearer " + idToken)  // token Firebase, no OpenAI
                 .build();
 
-        // Execute async
+        Log.d(TAG, "📤 Enviando al proxy: " + PROXY_URL);
+
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "❌ Network error: " + e.getMessage(), e);
                 callback.onError("Error de red: " + e.getMessage());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String responseBody = response.body() != null ? response.body().string() : "";
-
-                Log.d(TAG, "📥 Response code: " + response.code());
-                Log.d(TAG, "📥 Response body: " + responseBody);
+                String body = response.body() != null ? response.body().string() : "";
+                Log.d(TAG, "📥 Respuesta proxy (" + response.code() + ")");
 
                 if (!response.isSuccessful()) {
-                    handleErrorResponse(response.code(), responseBody, callback);
+                    handleErrorResponse(response.code(), body, callback);
                     return;
                 }
-
                 try {
-                    String aiMessage = parseOpenAIResponse(responseBody);
-                    Log.d(TAG, "✅ AI Response parsed successfully");
-                    callback.onSuccess(aiMessage);
+                    callback.onSuccess(parseOpenAIResponse(body));
                 } catch (Exception e) {
-                    Log.e(TAG, "❌ Error parsing response: " + e.getMessage(), e);
                     callback.onError("Error al procesar respuesta de IA");
                 }
             }
         });
     }
 
-    /**
-     * Build system prompt with trip context
-     */
-    private String buildSystemPrompt(String tripContext) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Eres un asistente de viajes experto y amigable llamado Travel AI. ");
-        prompt.append("Ayudas a los usuarios a planificar sus viajes, recomendar lugares y crear itinerarios. ");
-        prompt.append("Responde siempre en español, de forma clara, concisa y útil. ");
-        prompt.append("Tus respuestas deben ser específicas y accionables.");
-
-        if (tripContext != null && !tripContext.isEmpty()) {
-            prompt.append("\n\nContexto del viaje actual:\n").append(tripContext);
-        }
-
-        return prompt.toString();
-    }
-
-    /**
-     * Build request body with OpenAI format
-     */
-    private JsonObject buildOpenAIRequestBody(String systemPrompt, String userMessage) {
-        JsonObject requestBody = new JsonObject();
-
-        // Model
-        requestBody.addProperty("model", MODEL);
-
-        // Messages array
-        JsonArray messages = new JsonArray();
-
-        // System message
-        if (systemPrompt != null && !systemPrompt.isEmpty()) {
-            JsonObject systemMsg = new JsonObject();
-            systemMsg.addProperty("role", "system");
-            systemMsg.addProperty("content", systemPrompt);
-            messages.add(systemMsg);
-        }
-
-        // User message
-        JsonObject userMsg = new JsonObject();
-        userMsg.addProperty("role", "user");
-        userMsg.addProperty("content", userMessage);
-        messages.add(userMsg);
-
-        requestBody.add("messages", messages);
-
-        // Parameters
-        requestBody.addProperty("temperature", 0.7);
-        requestBody.addProperty("max_tokens", 1024);
-
-        return requestBody;
-    }
-
-    /**
-     * Parse OpenAI API response
-     */
     private String parseOpenAIResponse(String jsonResponse) {
-        try {
-            JsonObject responseObj = gson.fromJson(jsonResponse, JsonObject.class);
-
-            JsonArray choices = responseObj.getAsJsonArray("choices");
-            if (choices == null || choices.size() == 0) {
-                throw new Exception("No choices in response");
-            }
-
-            JsonObject firstChoice = choices.get(0).getAsJsonObject();
-            JsonObject message = firstChoice.getAsJsonObject("message");
-
-            return message.get("content").getAsString();
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error parsing response structure: " + e.getMessage());
-            throw new RuntimeException("Invalid response format");
+        JsonObject responseObj = gson.fromJson(jsonResponse, JsonObject.class);
+        JsonArray choices = responseObj.getAsJsonArray("choices");
+        if (choices == null || choices.size() == 0) {
+            throw new RuntimeException("No choices in response");
         }
+        return choices.get(0).getAsJsonObject()
+                .getAsJsonObject("message")
+                .get("content").getAsString();
     }
 
-    /**
-     * Handle HTTP error responses
-     */
     private void handleErrorResponse(int code, String body, ResponseCallback callback) {
-        String errorMessage;
-
+        Log.e(TAG, "❌ HTTP " + code + ": " + body);
         switch (code) {
-            case 400:
-                errorMessage = "Solicitud inválida. Revisa el formato del mensaje.";
-                Log.e(TAG, "❌ 400 Bad Request: " + body);
-                break;
-            case 401:
-                errorMessage = "API Key inválida. Verifica tu clave de OpenAI.";
-                Log.e(TAG, "❌ 401 Unauthorized - API Key issue: " + body);
-                break;
-            case 429:
-                errorMessage = "Demasiadas peticiones. Espera un momento.";
-                Log.e(TAG, "❌ 429 Too Many Requests: " + body);
-                break;
+            case 401: callback.onError("Sesión expirada. Vuelve a iniciar sesión."); break;
+            case 429: callback.onError("Demasiadas peticiones. Espera un momento."); break;
             case 500:
-            case 503:
-                errorMessage = "Error del servidor de OpenAI. Intenta de nuevo.";
-                Log.e(TAG, "❌ " + code + " Server Error: " + body);
-                break;
-            default:
-                errorMessage = "Error desconocido (código " + code + ")";
-                Log.e(TAG, "❌ HTTP " + code + ": " + body);
+            case 503: callback.onError("Error del servidor. Intenta de nuevo."); break;
+            default:  callback.onError("Error inesperado (código " + code + ")"); break;
         }
-
-        callback.onError(errorMessage);
     }
 
-    /**
-     * Callback interface for async responses
-     */
     public interface ResponseCallback {
         void onSuccess(String response);
         void onError(String error);

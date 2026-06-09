@@ -91,6 +91,18 @@ public class TripVerticalAdapter extends RecyclerView.Adapter<TripVerticalAdapte
         return trips != null ? trips.size() : 0;
     }
 
+    /**
+     * Reemplaza el contenido de la lista del adapter con {@code newData}
+     * y notifica al RecyclerView para que redibuje.
+     *
+     * Llamado desde MyTripsFragment cada vez que cambia el filtro o el orden.
+     */
+    public void updateData(List<Trip> newData) {
+        trips.clear();
+        if (newData != null) trips.addAll(newData);
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivBackground;
         TextView tvDestination, tvDates, tvBudget;
