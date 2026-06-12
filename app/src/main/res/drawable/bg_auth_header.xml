@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cabecera con degradado rosa neo y esquinas inferiores redondeadas.
+     Se usa en las pantallas de login y registro para darles impacto visual. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:startColor="#4D94FF"
+        android:centerColor="#1E6FE0"
+        android:endColor="#0B4FB0"
+        android:angle="135" />
+    <corners
+        android:bottomLeftRadius="40dp"
+        android:bottomRightRadius="40dp" />
+</shape>

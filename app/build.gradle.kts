@@ -12,7 +12,9 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.travelplannerai"
+        // applicationId = identidad pública en Play Store (no puede ser com.example.*)
+        // El namespace del código sigue siendo com.example.travelplannerai (no afecta a Play Store)
+        applicationId = "com.borja.travelplannerai"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

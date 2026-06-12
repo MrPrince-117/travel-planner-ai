@@ -11,10 +11,19 @@
          color claro (chips rosa/amarillo/verde, avatar, etc.). No cambia. -->
     <color name="ink_fixed">#1A1D24</color>
 
-    <!-- Acentos de marca (fijos en ambos temas) -->
-    <color name="neo_pink">#FF3399</color>
+    <!-- Color principal de marca: AZUL OCÉANO (antes era rosa).
+         Todo lo que referenciaba @color/neo_pink ahora es azul, de forma
+         que el acento es coherente en toda la app. -->
+    <color name="app_blue">#1E6FE0</color>
+    <color name="app_blue_dark">#0B4FB0</color>
+    <color name="app_blue_light">#4D94FF</color>
+
+    <!-- "neo_pink" se mantiene como nombre por compatibilidad, pero ahora
+         apunta al azul de marca (ya no hay rosa en la app). -->
+    <color name="neo_pink">@color/app_blue</color>
     <color name="neo_yellow">#FFD600</color>
-    <color name="primary_blue">#3B82F6</color>
+    <!-- Unificado con el azul de marca para no tener dos azules distintos -->
+    <color name="primary_blue">@color/app_blue</color>
     <color name="primary_green">#10B981</color>
     <color name="primary_purple">#A855F7</color>
     <color name="danger_red">#E53935</color>
