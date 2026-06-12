@@ -135,19 +135,23 @@ public class ItineraryFormatter {
         String[] parts = line.split("\\*\\*");
 
         for (int i = 0; i < parts.length; i++) {
+            if (parts[i].isEmpty()) continue;   // evita spans de longitud cero (crash)
+
             int start = result.length();
             result.append(parts[i]);
+            int end = result.length();
+
+            // Seguridad extra: nunca aplicar un span sobre un rango vacío
+            if (end <= start) continue;
+
             if (i % 2 == 1) { // índice impar = dentro de **...**
                 result.setSpan(new StyleSpan(Typeface.BOLD),
-                        start, result.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 result.setSpan(new ForegroundColorSpan(COLOR_TITLE),
-                        start, result.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
                 result.setSpan(new ForegroundColorSpan(COLOR_BODY),
-                        start, result.length(),
-                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
         }
         return result;

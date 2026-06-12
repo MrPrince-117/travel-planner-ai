@@ -215,6 +215,91 @@ public class OpenAIManager {
         }
     }
 
+    /**
+     * Envía un mensaje único con contexto opcional (usado en TripDetailFragment
+     * para generar el itinerario de un viaje concreto).
+     *
+     * Internamente construye una conversación de un solo turno y la manda al proxy.
+     *
+     * @param userMessage Mensaje / prompt del usuario
+     * @param tripContext Contexto del viaje (destino, fechas, presupuesto) o null
+     * @param callback    Resultado
+     */
+    public void sendMessage(String userMessage, String tripContext, ResponseCallback callback) {
+        if (PROXY_URL == null || PROXY_URL.isEmpty()) {
+            callback.onError("CHAT_PROXY_URL no configurada en local.properties");
+            return;
+        }
+
+        TokenProvider.getToken(new TokenProvider.TokenCallback() {
+            @Override
+            public void onToken(String idToken) {
+                // Construir body con system prompt de itinerario + mensaje del usuario
+                JsonObject requestBody = new JsonObject();
+                requestBody.addProperty("model", MODEL);
+
+                JsonArray messages = new JsonArray();
+
+                // System prompt para generación de itinerario
+                String systemPrompt = "Eres un asistente experto en viajes. "
+                        + "Genera itinerarios detallados, claros y útiles en español. "
+                        + "Usa formato legible con secciones por día.";
+                if (tripContext != null && !tripContext.isEmpty()) {
+                    systemPrompt += "\n\nContexto del viaje:\n" + tripContext;
+                }
+
+                JsonObject sys = new JsonObject();
+                sys.addProperty("role", "system");
+                sys.addProperty("content", systemPrompt);
+                messages.add(sys);
+
+                JsonObject user = new JsonObject();
+                user.addProperty("role", "user");
+                user.addProperty("content", userMessage);
+                messages.add(user);
+
+                requestBody.add("messages", messages);
+                requestBody.addProperty("temperature", 0.7);
+                requestBody.addProperty("max_tokens", 1024);
+
+                String jsonBody = gson.toJson(requestBody);
+
+                Request request = new Request.Builder()
+                        .url(PROXY_URL)
+                        .post(RequestBody.create(jsonBody, JSON_MEDIA_TYPE))
+                        .addHeader("Content-Type", "application/json")
+                        .addHeader("Authorization", "Bearer " + idToken)
+                        .build();
+
+                httpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        callback.onError("Error de red: " + e.getMessage());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        String body = response.body() != null ? response.body().string() : "";
+                        if (!response.isSuccessful()) {
+                            handleErrorResponse(response.code(), body, callback);
+                            return;
+                        }
+                        try {
+                            callback.onSuccess(parseOpenAIResponse(body));
+                        } catch (Exception e) {
+                            callback.onError("Error al procesar respuesta de IA");
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                callback.onError("Error de autenticación: " + error);
+            }
+        });
+    }
+
     public interface ResponseCallback {
         void onSuccess(String response);
         void onError(String error);
