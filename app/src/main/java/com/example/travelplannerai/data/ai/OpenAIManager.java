@@ -89,9 +89,24 @@ public class OpenAIManager {
             "[CREAR_VIAJE:{\"destination\":\"Calpe\",\"startDate\":\"05/08/2025\"," +
             "\"endDate\":\"12/08/2025\",\"budget\":1200}]\n\n" +
 
+            "## REGLAS IMPORTANTES (OBLIGATORIAS)\n" +
+            "- SOLO acepta destinos REALES y existentes en el mundo. Si el usuario pide un lugar " +
+            "ficticio o inventado (ej: 'Narnia', 'Ciudad Gótica', 'Wakanda'), explícale con amabilidad " +
+            "que solo planificas viajes a lugares reales y NO generes el marcador [CREAR_VIAJE].\n" +
+            "- NO planifiques viajes con fechas en el PASADO. Compara siempre con la fecha de hoy que " +
+            "se te indica. Si el usuario propone fechas pasadas, pídele fechas futuras y NO generes el marcador.\n" +
+            "- Las fechas deben ser coherentes: la fecha de fin debe ser igual o posterior a la de inicio.\n\n" +
+
             "## OTRAS CONSULTAS\n" +
             "Si el usuario pregunta algo sobre destinos, recomendaciones, clima, etc., " +
             "responde brevemente y ofrece ayudarle a planificar un viaje a ese lugar.";
+
+    /** Mensaje de sistema dinámico con la fecha actual (para validar fechas). */
+    private static String todaySystemLine() {
+        String hoy = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                .format(new java.util.Date());
+        return "La fecha de hoy es " + hoy + ". No planifiques viajes anteriores a esta fecha.";
+    }
 
     // ── API pública ──────────────────────────────────────────────────────────
 
@@ -141,7 +156,7 @@ public class OpenAIManager {
         // System prompt
         JsonObject sys = new JsonObject();
         sys.addProperty("role", "system");
-        sys.addProperty("content", CHAT_SYSTEM_PROMPT);
+        sys.addProperty("content", CHAT_SYSTEM_PROMPT + "\n\n" + todaySystemLine());
         messages.add(sys);
 
         // Historial completo
@@ -243,7 +258,10 @@ public class OpenAIManager {
                 // System prompt para generación de itinerario
                 String systemPrompt = "Eres un asistente experto en viajes. "
                         + "Genera itinerarios detallados, claros y útiles en español. "
-                        + "Usa formato legible con secciones por día.";
+                        + "Usa formato legible con secciones por día. "
+                        + "IMPORTANTE: solo crea itinerarios de lugares REALES y existentes con "
+                        + "sitios, calles y atracciones verídicas. Si el destino parece ficticio o "
+                        + "inventado, indícalo y no inventes lugares falsos.";
                 if (tripContext != null && !tripContext.isEmpty()) {
                     systemPrompt += "\n\nContexto del viaje:\n" + tripContext;
                 }

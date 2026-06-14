@@ -58,7 +58,35 @@ public class UnsplashManager {
      * @param callback Resultado con la URL de la foto
      */
     public void searchCityPhoto(String city, PhotoCallback callback) {
-        searchPhoto(city + " city landscape", callback);
+        // Cadena de búsquedas: si la primera no da resultados, probamos términos
+        // cada vez más genéricos para que casi siempre salga una foto del destino.
+        final String[] queries = {
+                city,
+                city + " skyline",
+                city + " travel",
+                city + " landmark"
+        };
+        tryQueries(queries, 0, callback);
+    }
+
+    /** Intenta cada query en orden hasta que una devuelva foto. */
+    private void tryQueries(String[] queries, int index, PhotoCallback callback) {
+        if (index >= queries.length) {
+            callback.onError("Sin resultados");
+            return;
+        }
+        searchPhoto(queries[index], new PhotoCallback() {
+            @Override
+            public void onSuccess(String photoUrl) {
+                callback.onSuccess(photoUrl);
+            }
+
+            @Override
+            public void onError(String error) {
+                // Probar la siguiente query del fallback
+                tryQueries(queries, index + 1, callback);
+            }
+        });
     }
 
     /**

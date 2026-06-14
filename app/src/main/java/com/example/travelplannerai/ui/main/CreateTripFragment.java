@@ -19,6 +19,7 @@ import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
 import com.example.travelplannerai.R;
+import com.example.travelplannerai.data.api.NominatimManager;
 import com.example.travelplannerai.data.api.UnsplashManager;
 import com.example.travelplannerai.data.firebase.FirebaseAuthManager;
 import com.example.travelplannerai.data.firebase.FirebaseFirestoreManager;
@@ -26,6 +27,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -36,6 +38,10 @@ public class CreateTripFragment extends Fragment {
     private ProgressBar       pbLoadingTrip;
     private ImageView         ivCityPreview;
     private String            currentCityPhotoUrl = "";
+
+    // Fechas seleccionadas (para validar y limitar el calendario)
+    private Calendar startCal = null;
+    private Calendar endCal   = null;
 
     public CreateTripFragment() { }
 
@@ -65,8 +71,8 @@ public class CreateTripFragment extends Fragment {
         etEndDate.setFocusable(false);
         etEndDate.setClickable(true);
 
-        etStartDate.setOnClickListener(v -> showDatePicker(etStartDate));
-        etEndDate.setOnClickListener(v -> showDatePicker(etEndDate));
+        etStartDate.setOnClickListener(v -> showDatePicker(true));
+        etEndDate.setOnClickListener(v -> showDatePicker(false));
 
         etDestination.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
@@ -107,14 +113,62 @@ public class CreateTripFragment extends Fragment {
         });
     }
 
-    private void showDatePicker(TextInputEditText editText) {
-        Calendar c = Calendar.getInstance();
-        new DatePickerDialog(requireContext(),
+    /**
+     * Muestra el selector de fecha.
+     * @param isStart true para la fecha de inicio, false para la de fin.
+     *
+     * Reglas:
+     *  - La fecha de inicio no puede ser anterior a hoy.
+     *  - La fecha de fin no puede ser anterior a la de inicio.
+     */
+    private void showDatePicker(boolean isStart) {
+        Calendar today = stripTime(Calendar.getInstance());
+
+        // Fecha que aparece preseleccionada al abrir el calendario
+        Calendar preset = isStart
+                ? (startCal != null ? startCal : today)
+                : (endCal   != null ? endCal   : (startCal != null ? startCal : today));
+
+        DatePickerDialog dialog = new DatePickerDialog(requireContext(),
                 (view, year, month, day) -> {
-                    String date = String.format(Locale.getDefault(), "%02d/%02d/%d", day, month + 1, year);
-                    editText.setText(date);
+                    Calendar chosen = Calendar.getInstance();
+                    chosen.set(year, month, day);
+                    stripTime(chosen);
+
+                    if (isStart) {
+                        startCal = chosen;
+                        etStartDate.setText(formatDate(chosen));
+                        etStartDate.setError(null);
+                        // Si la fecha de fin quedó antes que la nueva de inicio, se limpia
+                        if (endCal != null && endCal.before(startCal)) {
+                            endCal = null;
+                            etEndDate.setText("");
+                        }
+                    } else {
+                        endCal = chosen;
+                        etEndDate.setText(formatDate(chosen));
+                        etEndDate.setError(null);
+                    }
                 },
-                c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+                preset.get(Calendar.YEAR), preset.get(Calendar.MONTH), preset.get(Calendar.DAY_OF_MONTH));
+
+        // Límite inferior del calendario
+        Calendar min = isStart ? today : (startCal != null ? startCal : today);
+        dialog.getDatePicker().setMinDate(min.getTimeInMillis());
+        dialog.show();
+    }
+
+    private String formatDate(Calendar c) {
+        return String.format(Locale.getDefault(), "%02d/%02d/%d",
+                c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH) + 1, c.get(Calendar.YEAR));
+    }
+
+    private Calendar stripTime(Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        return c;
     }
 
     private void validateAndSaveTrip() {
@@ -127,13 +181,68 @@ public class CreateTripFragment extends Fragment {
         if (TextUtils.isEmpty(startDate))   { etStartDate.setError("Fecha de inicio obligatoria"); return; }
         if (TextUtils.isEmpty(endDate))     { etEndDate.setError("Fecha de fin obligatoria");      return; }
 
+        // Validación de fechas: no en el pasado y fin >= inicio
+        Calendar today = stripTime(Calendar.getInstance());
+        if (startCal == null || endCal == null) {
+            Toast.makeText(getContext(), "Selecciona las fechas con el calendario", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (startCal.before(today)) {
+            etStartDate.setError("La fecha de inicio no puede estar en el pasado");
+            Toast.makeText(getContext(), "No puedes crear un viaje en el pasado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (endCal.before(startCal)) {
+            etEndDate.setError("La fecha de fin debe ser posterior a la de inicio");
+            return;
+        }
+
         Double budget = 0.0;
         if (!TextUtils.isEmpty(budgetStr)) {
             try { budget = Double.parseDouble(budgetStr); }
             catch (NumberFormatException e) { etBudget.setError("Presupuesto no válido"); return; }
         }
 
-        saveToFirestore(destination, budget, startDate, endDate);
+        // Verificar que el destino exista de verdad (no ficticio) antes de guardar
+        verifyDestinationAndSave(destination, budget, startDate, endDate);
+    }
+
+    /**
+     * Comprueba con Nominatim que el destino sea un lugar real.
+     * Si no se encuentra, no se crea el viaje (evita destinos ficticios).
+     */
+    private void verifyDestinationAndSave(String destination, Double budget,
+                                          String startDate, String endDate) {
+        setLoading(true);
+        NominatimManager.getInstance().searchPlaces(destination,
+                new NominatimManager.PlacesCallback() {
+                    @Override
+                    public void onSuccess(List<NominatimManager.Place> places) {
+                        if (!isAdded() || getActivity() == null) return;
+                        getActivity().runOnUiThread(() -> {
+                            if (!isAdded()) return;
+                            if (places == null || places.isEmpty()) {
+                                setLoading(false);
+                                etDestination.setError("No encontramos ese destino. Revisa el nombre.");
+                                Toast.makeText(getContext(),
+                                        "Ese destino no existe o está mal escrito",
+                                        Toast.LENGTH_LONG).show();
+                            } else {
+                                saveToFirestore(destination, budget, startDate, endDate);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        // Si Nominatim falla (red), permitimos continuar para no bloquear al usuario
+                        if (!isAdded() || getActivity() == null) return;
+                        getActivity().runOnUiThread(() -> {
+                            if (!isAdded()) return;
+                            saveToFirestore(destination, budget, startDate, endDate);
+                        });
+                    }
+                });
     }
 
     private void saveToFirestore(String destination, Double budget, String start, String end) {

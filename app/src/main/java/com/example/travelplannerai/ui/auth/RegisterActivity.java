@@ -15,7 +15,6 @@ import com.example.travelplannerai.MainActivity;
 import com.example.travelplannerai.R;
 import com.example.travelplannerai.data.firebase.FirebaseAuthManager;
 import com.example.travelplannerai.data.firebase.FirebaseFirestoreManager;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,13 +39,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         authManager      = FirebaseAuthManager.getInstance();
         firestoreManager = FirebaseFirestoreManager.getInstance();
-
-        // 🛠️ FIX DEFINITIVO PARA EL EMULADOR (Desactivar reCAPTCHA de fondo)
-        try {
-            FirebaseAuth.getInstance().getFirebaseAuthSettings().setAppVerificationDisabledForTesting(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         // Inicializar vistas
         etName            = findViewById(R.id.etRegisterName);

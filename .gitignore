@@ -15,3 +15,13 @@
 local.properties
 google-services.json
 app-debug-androidTest.apk
+# Credenciales de firma (NO subir)
+keystore.properties
+*.jks
+
+# Artefactos de build y archivos auxiliares (NO versionar)
+/app/release/
+*.apk
+*.aab
+testers.csv
+ic_store_*.png

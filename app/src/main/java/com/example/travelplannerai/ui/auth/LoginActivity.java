@@ -19,10 +19,6 @@ import com.example.travelplannerai.data.firebase.FirebaseAuthManager;
 
 public class LoginActivity extends AppCompatActivity {
 
-    // Credenciales de prueba (modo desarrollo)
-    private static final String DEV_EMAIL    = "borjaticonamanrique@gmail.com";
-    private static final String DEV_PASSWORD = "proyectofinal";
-
     private EditText    etEmail;
     private EditText    etPassword;
     private Button      btnLogin;
@@ -53,10 +49,6 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
         progressBar      = findViewById(R.id.progressBarLogin);
 
-        // Pre-rellenar credenciales de desarrollo para pruebas rápidas
-        etEmail.setText(DEV_EMAIL);
-        etPassword.setText(DEV_PASSWORD);
-
         btnLogin.setOnClickListener(v -> attemptLogin());
 
         tvRegister.setOnClickListener(v -> {
@@ -86,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
             etResetEmail.setSelection(emailActual.length());
         }
 
-        new AlertDialog.Builder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Recuperar contraseña")
                 .setMessage("Te enviaremos un enlace para restablecer tu contraseña.")
                 .setView(etResetEmail)

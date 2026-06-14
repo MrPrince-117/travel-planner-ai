@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,7 +61,7 @@ public class ChatFragment extends Fragment {
     private RecyclerView       rvChatMessages;
     private TextInputEditText  etChatMessage;
     private FloatingActionButton fabSendMessage;
-    private ProgressBar        progressBar;
+    private View               typingIndicator;
     private MaterialButton     btnNewChat;
     private MaterialCardView   cardCreateTrip;
     private TextView           tvTripSummary;
@@ -122,7 +121,7 @@ public class ChatFragment extends Fragment {
         rvChatMessages = view.findViewById(R.id.rvChatMessages);
         etChatMessage  = view.findViewById(R.id.etChatMessage);
         fabSendMessage = view.findViewById(R.id.fabSendMessage);
-        progressBar    = view.findViewById(R.id.progressBar);
+        typingIndicator = view.findViewById(R.id.typingIndicator);
         btnNewChat     = view.findViewById(R.id.btnNewChat);
         cardCreateTrip = view.findViewById(R.id.cardCreateTrip);
         tvTripSummary  = view.findViewById(R.id.tvTripSummary);
@@ -275,6 +274,25 @@ public class ChatFragment extends Fragment {
         return TRIP_PATTERN.matcher(response).replaceAll("").trim();
     }
 
+    /** True si la fecha "dd/MM/yyyy" es anterior a hoy. */
+    private boolean isPastDate(String ddMMyyyy) {
+        if (ddMMyyyy == null || ddMMyyyy.trim().isEmpty()) return false;
+        try {
+            java.text.SimpleDateFormat sdf =
+                    new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+            sdf.setLenient(false);
+            java.util.Date date = sdf.parse(ddMMyyyy.trim());
+            java.util.Calendar today = java.util.Calendar.getInstance();
+            today.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            today.set(java.util.Calendar.MINUTE, 0);
+            today.set(java.util.Calendar.SECOND, 0);
+            today.set(java.util.Calendar.MILLISECOND, 0);
+            return date != null && date.before(today.getTime());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     // ════════════════════════════════════════════════════════════════════════
     //  Card "Crear viaje"
     // ════════════════════════════════════════════════════════════════════════
@@ -300,6 +318,16 @@ public class ChatFragment extends Fragment {
     private void createTripFromChat() {
         if (detectedTrip == null) return;
         if (currentUserId == null) return;
+
+        // Red de seguridad: no permitir crear viajes con fecha de inicio en el pasado
+        if (isPastDate(detectedTrip.startDate)) {
+            Toast.makeText(getContext(),
+                    "Ese viaje empieza en una fecha pasada. Pídeme fechas futuras 🙂",
+                    Toast.LENGTH_LONG).show();
+            cardCreateTrip.setVisibility(View.GONE);
+            detectedTrip = null;
+            return;
+        }
 
         btnCreateTrip.setEnabled(false);
         btnCreateTrip.setText("Creando viaje...");
@@ -390,7 +418,8 @@ public class ChatFragment extends Fragment {
     }
 
     private void showLoading(boolean show) {
-        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (typingIndicator != null)
+            typingIndicator.setVisibility(show ? View.VISIBLE : View.GONE);
         fabSendMessage.setEnabled(!show);
         etChatMessage.setEnabled(!show);
     }

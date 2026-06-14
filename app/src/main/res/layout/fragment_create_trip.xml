@@ -22,11 +22,12 @@
 
             <ImageButton
                 android:id="@+id/btnBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/neo_card_bg"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_icon_button"
                 android:contentDescription="Volver"
-                android:padding="8dp"
+                android:padding="10dp"
+                android:scaleType="centerInside"
                 android:src="@drawable/ic_arrow_back"
                 app:tint="@color/neo_black"
                 android:layout_marginEnd="16dp" />
@@ -34,10 +35,11 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:text="Planifica tu Aventura"
                 android:textColor="@color/neo_black"
-                android:textSize="26sp"
+                android:textSize="24sp"
                 android:fontFamily="sans-serif-black"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -56,7 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@android:drawable/ic_menu_gallery"
+                android:src="@drawable/bg_image_placeholder"
                 android:contentDescription="Vista previa de la ciudad" />
         </androidx.cardview.widget.CardView>
 

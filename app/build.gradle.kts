@@ -7,18 +7,35 @@ plugins {
 
 
 
+// Credenciales de firma (archivo local, NO versionado)
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) load(f.inputStream())
+}
+
 android {
     namespace = "com.example.travelplannerai"
-    compileSdk = 34
+    compileSdk = 35
+
+    signingConfigs {
+        if (rootProject.file("keystore.properties").exists()) {
+            create("release") {
+                storeFile = file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
+    }
 
     defaultConfig {
         // applicationId = identidad pública en Play Store (no puede ser com.example.*)
         // El namespace del código sigue siendo com.example.travelplannerai (no afecta a Play Store)
         applicationId = "com.borja.travelplannerai"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 3
+        versionName = "1.1"
 
         // Leer keys desde local.properties
         val localProps = Properties()
@@ -36,6 +53,16 @@ android {
 
     buildFeatures {
         buildConfig = true  // DEBE ESTAR AQUÍ
+    }
+
+    buildTypes {
+        getByName("release") {
+            // Firma automática si existe keystore.properties
+            if (rootProject.file("keystore.properties").exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            isMinifyEnabled = false
+        }
     }
 }
 

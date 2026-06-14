@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder de imagen: degradado azul de marca + icono de ubicación.
+     Se usa mientras carga la foto del destino o cuando no hay foto. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="@color/app_blue_light"
+                android:centerColor="@color/app_blue"
+                android:endColor="@color/app_blue_dark" />
+        </shape>
+    </item>
+
+    <item
+        android:width="48dp"
+        android:height="48dp"
+        android:gravity="center"
+        android:drawable="@drawable/ic_launcher_foreground" />
+
+</layer-list>

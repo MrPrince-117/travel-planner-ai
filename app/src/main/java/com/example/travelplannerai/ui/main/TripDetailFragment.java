@@ -155,9 +155,14 @@ public class TripDetailFragment extends Fragment {
         tvDetailDestination.setText(trip.getDestination());
         tvDetailDates.setText(trip.getDates());
         tvDetailBudget.setText(trip.getBudget() != null
-                ? trip.getBudget() + "€" : "No especificado");
+                ? trip.getBudget().intValue() + "€" : "No especificado");
         if (trip.getImageUrl() != null && !trip.getImageUrl().isEmpty())
-            Glide.with(this).load(trip.getImageUrl()).centerCrop().into(ivDetailHeader);
+            Glide.with(this).load(trip.getImageUrl())
+                    .placeholder(R.drawable.bg_image_placeholder)
+                    .error(R.drawable.bg_image_placeholder)
+                    .centerCrop().into(ivDetailHeader);
+        else
+            ivDetailHeader.setImageResource(R.drawable.bg_image_placeholder);
     }
 
     // ==================== ITINERARIO IA CON CACHÉ ====================
@@ -232,6 +237,12 @@ public class TripDetailFragment extends Fragment {
     private void goToCreateExcursion() {
         Bundle args = new Bundle();
         args.putString("tripId", tripId);
+        // Pasamos las fechas del viaje para limitar el calendario de la excursión
+        if (currentTrip != null && currentTrip.getDates() != null) {
+            String[] parts = currentTrip.getDates().split(" - ");
+            if (parts.length >= 1) args.putString("tripStartDate", parts[0].trim());
+            if (parts.length >= 2) args.putString("tripEndDate",   parts[1].trim());
+        }
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_tripDetailFragment_to_createExcursionFragment, args);
     }
@@ -252,7 +263,7 @@ public class TripDetailFragment extends Fragment {
     }
 
     private void confirmDeleteExcursion(Excursion excursion) {
-        new AlertDialog.Builder(requireContext())
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Eliminar excursión")
                 .setMessage("¿Seguro que quieres eliminar \"" + excursion.getName() + "\"?")
                 .setPositiveButton("Eliminar", (d, w) -> deleteExcursion(excursion))
@@ -367,7 +378,7 @@ public class TripDetailFragment extends Fragment {
 
     private void deleteTrip() {
         if (tripId == null) return;
-        new AlertDialog.Builder(requireContext())
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Borrar viaje")
                 .setMessage("¿Estás seguro? Esta acción no se puede deshacer.")
                 .setPositiveButton("Borrar", (dialog, which) -> {

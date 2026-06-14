@@ -1,7 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.TravelPlannerAI" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
-    </style>
+    <!-- El TEMA OSCURO reutiliza la definición de values/themes.xml.
+         No se redefine aquí porque los colores semánticos (neo_bg, app_surface,
+         text_dark, etc.) ya tienen su variante oscura en values-night/colors.xml,
+         de modo que todos los componentes Material cambian de color solos. -->
 </resources>
