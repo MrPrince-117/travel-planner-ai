@@ -1,11 +1,63 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme (TEMA CLARO).
+         Los colores semánticos (neo_bg, app_surface, text_dark...) tienen su
+         variante en values-night/, así que los componentes Material se adaptan
+         solos al modo oscuro. El azul de marca (app_blue) es fijo a propósito. -->
     <style name="Base.Theme.TravelPlannerAI" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Color de marca -->
+        <item name="colorPrimary">@color/app_blue</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/app_blue_light</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+
+        <item name="colorSecondary">@color/app_blue</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Fondos y superficies (se adaptan a claro/oscuro) -->
+        <item name="android:colorBackground">@color/neo_bg</item>
+        <item name="colorOnBackground">@color/text_dark</item>
+        <item name="colorSurface">@color/app_surface</item>
+        <item name="colorOnSurface">@color/text_dark</item>
+        <item name="colorSurfaceVariant">@color/app_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/text_muted</item>
+
+        <!-- Errores -->
+        <item name="colorError">@color/danger_red</item>
+        <item name="colorOnError">@color/white</item>
+
+        <!-- Diálogos legibles en ambos temas -->
+        <item name="materialAlertDialogTheme">@style/AppAlertDialog</item>
+        <item name="alertDialogTheme">@style/AppAlertDialog</item>
     </style>
 
     <style name="Theme.TravelPlannerAI" parent="Base.Theme.TravelPlannerAI" />
+
+    <!-- Tema de los diálogos de alerta (confirmaciones de borrado, etc.) -->
+    <style name="AppAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/app_surface</item>
+        <item name="colorOnSurface">@color/text_dark</item>
+        <item name="colorPrimary">@color/app_blue</item>
+        <item name="android:textColorPrimary">@color/text_dark</item>
+        <item name="android:textColorSecondary">@color/text_muted</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/AppAlertDialog.Title</item>
+        <item name="buttonBarPositiveButtonStyle">@style/AppAlertDialog.PositiveButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AppAlertDialog.NegativeButton</item>
+    </style>
+
+    <style name="AppAlertDialog.Title" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppAlertDialog.PositiveButton" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/app_blue</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppAlertDialog.NegativeButton" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/text_muted</item>
+    </style>
 
     <style name="CircleAppearance">
         <item name="cornerFamily">rounded</item>

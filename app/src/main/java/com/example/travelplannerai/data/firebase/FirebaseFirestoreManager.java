@@ -124,7 +124,26 @@ public class FirebaseFirestoreManager {
     }
 
     public Task<Void> deleteTrip(String tripId) {
+        // Limpieza en cascada (best-effort, en segundo plano) para no dejar
+        // excursiones ni favoritos huérfanos apuntando a un viaje borrado.
+        cleanupTripSubdata(tripId);
         return deleteDocument(COLLECTION_TRIPS, tripId);
+    }
+
+    /**
+     * Borra los datos asociados a un viaje: su subcolección de excursiones
+     * (trips/{tripId}/excursions) y cualquier entrada en favoritos con ese tripId.
+     */
+    private void cleanupTripSubdata(String tripId) {
+        db.collection(COLLECTION_TRIPS).document(tripId).collection("excursions").get()
+                .addOnSuccessListener(snap -> {
+                    for (DocumentSnapshot d : snap.getDocuments()) d.getReference().delete();
+                });
+
+        db.collection(COLLECTION_FAVORITES).whereEqualTo("tripId", tripId).get()
+                .addOnSuccessListener(snap -> {
+                    for (DocumentSnapshot d : snap.getDocuments()) d.getReference().delete();
+                });
     }
 
     // ==================== EXCURSIONES ====================

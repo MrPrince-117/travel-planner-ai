@@ -243,16 +243,34 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- ProgressBar (IA pensando) -->
-    <ProgressBar
-        android:id="@+id/progressBar"
+    <!-- Indicador "IA escribiendo": aparece justo encima del campo de texto -->
+    <LinearLayout
+        android:id="@+id/typingIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:indeterminateTint="@color/neo_pink"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="6dp"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/cardCreateTrip"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerDivider" />
+        app:layout_constraintBottom_toTopOf="@id/chatInputContainer"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:indeterminateTint="@color/neo_pink" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Travel AI está escribiendo…"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

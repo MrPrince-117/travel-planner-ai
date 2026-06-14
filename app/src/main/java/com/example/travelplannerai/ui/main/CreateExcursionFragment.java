@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,18 +17,30 @@ import androidx.navigation.Navigation;
 
 import com.example.travelplannerai.R;
 import com.example.travelplannerai.data.firebase.FirebaseFirestoreManager;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 public class CreateExcursionFragment extends Fragment {
 
+    // No estático: Locale.getDefault() se evalúa al crear el fragment, no al
+    // cargar la clase, así respeta cambios de idioma en caliente (ConstantLocale).
+    private final SimpleDateFormat DATE_FORMAT =
+            new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
     private TextInputEditText etName, etLocation, etDate, etTime;
-    private Button            btnSave;
+    private MaterialButton    btnSave;
     private String            tripId;
+
+    // Periodo del viaje (límites del calendario de la excursión)
+    private Calendar tripStart = null;
+    private Calendar tripEnd   = null;
 
     @Nullable
     @Override
@@ -36,9 +48,11 @@ public class CreateExcursionFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_create_excursion, container, false);
 
-        // Recoger el tripId pasado como argumento
+        // Recoger argumentos: tripId y fechas del viaje
         if (getArguments() != null) {
-            tripId = getArguments().getString("tripId");
+            tripId    = getArguments().getString("tripId");
+            tripStart = parseToCalendar(getArguments().getString("tripStartDate"));
+            tripEnd   = parseToCalendar(getArguments().getString("tripEndDate"));
         }
 
         etName     = view.findViewById(R.id.etExcursionName);
@@ -46,6 +60,19 @@ public class CreateExcursionFragment extends Fragment {
         etDate     = view.findViewById(R.id.etExcursionDate);
         etTime     = view.findViewById(R.id.etExcursionTime);
         btnSave    = view.findViewById(R.id.btnSaveExcursion);
+
+        // Botón atrás
+        ImageButton btnBack = view.findViewById(R.id.btnBackExcursion);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v ->
+                    Navigation.findNavController(requireView()).popBackStack());
+        }
+
+        // Pista de fechas válidas
+        if (tripStart != null && tripEnd != null) {
+            etDate.setHint("Entre " + DATE_FORMAT.format(tripStart.getTime())
+                    + " y " + DATE_FORMAT.format(tripEnd.getTime()));
+        }
 
         // DatePicker al pulsar fecha
         etDate.setOnClickListener(v -> showDatePicker());
@@ -58,17 +85,48 @@ public class CreateExcursionFragment extends Fragment {
         return view;
     }
 
+    @Nullable
+    private Calendar parseToCalendar(@Nullable String ddMMyyyy) {
+        if (ddMMyyyy == null || ddMMyyyy.trim().isEmpty()) return null;
+        try {
+            Date d = DATE_FORMAT.parse(ddMMyyyy.trim());
+            if (d == null) return null;
+            Calendar c = Calendar.getInstance();
+            c.setTime(d);
+            stripTime(c);
+            return c;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void stripTime(Calendar c) {
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+    }
+
     private void showDatePicker() {
-        Calendar c = Calendar.getInstance();
-        new DatePickerDialog(requireContext(),
+        // Fecha inicial preseleccionada: inicio del viaje si existe, si no hoy
+        Calendar preset = tripStart != null ? (Calendar) tripStart.clone() : Calendar.getInstance();
+
+        DatePickerDialog dialog = new DatePickerDialog(requireContext(),
                 (view, year, month, day) -> {
                     String date = String.format(Locale.getDefault(), "%02d/%02d/%d", day, month + 1, year);
                     etDate.setText(date);
+                    etDate.setError(null);
                 },
-                c.get(Calendar.YEAR),
-                c.get(Calendar.MONTH),
-                c.get(Calendar.DAY_OF_MONTH)
-        ).show();
+                preset.get(Calendar.YEAR),
+                preset.get(Calendar.MONTH),
+                preset.get(Calendar.DAY_OF_MONTH)
+        );
+
+        // Limitar el calendario al periodo del viaje
+        if (tripStart != null) dialog.getDatePicker().setMinDate(tripStart.getTimeInMillis());
+        if (tripEnd != null)   dialog.getDatePicker().setMaxDate(tripEnd.getTimeInMillis());
+
+        dialog.show();
     }
 
     private void showTimePicker() {
@@ -99,6 +157,20 @@ public class CreateExcursionFragment extends Fragment {
             etDate.setError("La fecha es obligatoria");
             etDate.requestFocus();
             return;
+        }
+
+        // Validar que la fecha esté dentro del periodo del viaje
+        Calendar excDate = parseToCalendar(date);
+        if (excDate != null && tripStart != null && tripEnd != null) {
+            if (excDate.before(tripStart) || excDate.after(tripEnd)) {
+                etDate.setError("La fecha debe estar dentro del viaje");
+                Toast.makeText(getContext(),
+                        "La excursión debe estar entre el "
+                                + DATE_FORMAT.format(tripStart.getTime()) + " y el "
+                                + DATE_FORMAT.format(tripEnd.getTime()),
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
         }
 
         saveToFirestore(name, location, date, time);

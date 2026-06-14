@@ -55,9 +55,11 @@ public class MyTripsFragment extends Fragment implements TripVerticalAdapter.OnT
 
     private static final String TAG = "MyTripsFragment";
 
-    // Formato de fecha usado al crear viajes: "dd/MM/yyyy - dd/MM/yyyy"
+    // Formato de fecha usado al crear viajes: "dd/MM/yyyy - dd/MM/yyyy".
+    // Locale fijo (la fecha es numérica, el idioma no influye) para evitar
+    // capturar Locale.getDefault() en un campo estático (ConstantLocale).
     private static final SimpleDateFormat DATE_FORMAT =
-            new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            new SimpleDateFormat("dd/MM/yyyy", Locale.US);
 
     // ── Enumerados internos ──────────────────────────────────────────────────
 

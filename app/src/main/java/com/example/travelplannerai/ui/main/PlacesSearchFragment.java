@@ -340,22 +340,73 @@ public class PlacesSearchFragment extends Fragment
             return;
         }
 
-        java.util.Map<String, Object> data = new java.util.HashMap<>();
-        data.put("userId",   userId);
-        data.put("name",     place.name);
-        data.put("address",  place.address);
-        data.put("category", place.category);
-        data.put("lat",      place.lat);
-        data.put("lng",      place.lng);
+        // Comportamiento toggle: si el lugar YA está guardado, se quita; si no, se añade.
+        // Así evitamos que se pueda guardar el mismo sitio muchas veces.
+        FirebaseFirestoreManager.getInstance().getUserSavedPlaces(userId)
+                .addOnSuccessListener(snapshot -> {
+                    if (!isAdded()) return;
 
-        FirebaseFirestoreManager.getInstance().savePlace(data)
-                .addOnSuccessListener(ref ->
-                        Toast.makeText(getContext(),
-                                "📍 " + place.name + " guardado en Favoritos",
-                                Toast.LENGTH_SHORT).show())
-                .addOnFailureListener(e ->
-                        Toast.makeText(getContext(),
-                                "Error al guardar el lugar", Toast.LENGTH_SHORT).show());
+                    String existingId = null;
+                    if (snapshot != null) {
+                        for (com.google.firebase.firestore.QueryDocumentSnapshot doc : snapshot) {
+                            String name = doc.getString("name");
+                            Double lat  = doc.getDouble("lat");
+                            Double lng  = doc.getDouble("lng");
+                            boolean sameName = name != null && name.equalsIgnoreCase(place.name);
+                            boolean sameCoords = lat != null && lng != null
+                                    && Math.abs(lat - place.lat) < 0.0001
+                                    && Math.abs(lng - place.lng) < 0.0001;
+                            if (sameName || sameCoords) {
+                                existingId = doc.getId();
+                                break;
+                            }
+                        }
+                    }
+
+                    if (existingId != null) {
+                        // Ya estaba → lo quitamos (toggle off)
+                        final String idToDelete = existingId;
+                        FirebaseFirestoreManager.getInstance().deletePlace(idToDelete)
+                                .addOnSuccessListener(v -> {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(getContext(),
+                                            "💔 " + place.name + " quitado de Favoritos",
+                                            Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(getContext(),
+                                            "Error al quitar el lugar", Toast.LENGTH_SHORT).show();
+                                });
+                    } else {
+                        // No estaba → lo guardamos
+                        java.util.Map<String, Object> data = new java.util.HashMap<>();
+                        data.put("userId",   userId);
+                        data.put("name",     place.name);
+                        data.put("address",  place.address);
+                        data.put("category", place.category);
+                        data.put("lat",      place.lat);
+                        data.put("lng",      place.lng);
+
+                        FirebaseFirestoreManager.getInstance().savePlace(data)
+                                .addOnSuccessListener(ref -> {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(getContext(),
+                                            "📍 " + place.name + " guardado en Favoritos",
+                                            Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    if (!isAdded()) return;
+                                    Toast.makeText(getContext(),
+                                            "Error al guardar el lugar", Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    if (!isAdded()) return;
+                    Toast.makeText(getContext(),
+                            "Error al comprobar tus favoritos", Toast.LENGTH_SHORT).show();
+                });
     }
 
     /**

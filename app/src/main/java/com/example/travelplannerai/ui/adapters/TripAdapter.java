@@ -48,7 +48,7 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder
         holder.tvDates.setText(trip.getDates());
 
         if (trip.getBudget() != null) {
-            holder.tvBudget.setText("Presupuesto: " + trip.getBudget() + "€");
+            holder.tvBudget.setText("Presupuesto: " + trip.getBudget().intValue() + "€");
             holder.tvBudget.setVisibility(View.VISIBLE);
         } else {
             holder.tvBudget.setVisibility(View.GONE);
@@ -57,11 +57,12 @@ public class TripAdapter extends RecyclerView.Adapter<TripAdapter.TripViewHolder
         if (trip.getImageUrl() != null && !trip.getImageUrl().isEmpty()) {
             Glide.with(holder.itemView.getContext())
                     .load(trip.getImageUrl())
-                    .placeholder(android.R.drawable.ic_menu_gallery)
+                    .placeholder(R.drawable.bg_image_placeholder)
+                    .error(R.drawable.bg_image_placeholder)
                     .centerCrop()
                     .into(holder.ivImage);
         } else {
-            holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
+            holder.ivImage.setImageResource(R.drawable.bg_image_placeholder);
         }
 
         // ✅ CONVERTIR ID A STRING

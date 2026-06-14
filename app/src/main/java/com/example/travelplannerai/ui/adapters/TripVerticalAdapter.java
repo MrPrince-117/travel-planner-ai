@@ -48,9 +48,9 @@ public class TripVerticalAdapter extends RecyclerView.Adapter<TripVerticalAdapte
         holder.tvDestination.setText(trip.getDestination() != null ? trip.getDestination() : "Destino desconocido");
         holder.tvDates.setText(trip.getDates() != null ? trip.getDates() : "Fechas no definidas");
         
-        // 2. Extracción blindada del presupuesto (Double a String seguro)
+        // 2. Extracción blindada del presupuesto (Double a String seguro, sin decimales)
         if (trip.getBudget() != null) {
-            holder.tvBudget.setText(String.valueOf(trip.getBudget()) + "€");
+            holder.tvBudget.setText(trip.getBudget().intValue() + "€");
         } else {
             holder.tvBudget.setText("0€");
         }
@@ -70,11 +70,11 @@ public class TripVerticalAdapter extends RecyclerView.Adapter<TripVerticalAdapte
                     Glide.with(context)
                             .load(imageUrl)
                             .centerCrop()
-                            .placeholder(android.R.drawable.ic_menu_gallery)
-                            .error(android.R.drawable.ic_menu_gallery)
+                            .placeholder(R.drawable.bg_image_placeholder)
+                            .error(R.drawable.bg_image_placeholder)
                             .into(holder.ivBackground);
                 } else {
-                    holder.ivBackground.setImageResource(android.R.drawable.ic_menu_gallery);
+                    holder.ivBackground.setImageResource(R.drawable.bg_image_placeholder);
                 }
             }
         }

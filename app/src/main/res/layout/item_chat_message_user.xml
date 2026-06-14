@@ -4,36 +4,46 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:gravity="end|bottom"
-    android:paddingStart="56dp"
+    android:gravity="bottom"
+    android:paddingStart="48dp"
     android:paddingEnd="12dp"
     android:paddingTop="4dp"
     android:paddingBottom="4dp">
 
-    <!-- Burbuja del mensaje del usuario -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="wrap_content"
+    <!-- Contenedor que ocupa el ancho restante; la burbuja se alinea a la derecha
+         y envuelve el contenido, dejando que el texto largo haga salto de línea. -->
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="18dp"
-        app:cardBackgroundColor="@color/neo_pink"
-        app:strokeColor="@color/neo_black"
-        app:strokeWidth="1.5dp"
-        app:cardElevation="0dp">
+        android:layout_weight="1"
+        android:gravity="end">
 
-        <TextView
-            android:id="@+id/tvUserMessage"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:textColor="@color/white"
-            android:textSize="15sp"
-            android:lineSpacingExtra="3dp"
-            android:fontFamily="sans-serif-medium" />
+            app:cardCornerRadius="18dp"
+            app:cardBackgroundColor="@color/neo_pink"
+            app:strokeColor="@color/neo_black"
+            app:strokeWidth="1.5dp"
+            app:cardElevation="0dp">
 
-    </com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:id="@+id/tvUserMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:lineSpacingExtra="3dp"
+                android:textIsSelectable="true"
+                android:fontFamily="sans-serif-medium" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
 
     <!-- Avatar usuario: círculo azul pequeño -->
     <com.google.android.material.card.MaterialCardView

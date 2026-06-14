@@ -37,6 +37,9 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
     private RecyclerView rvUpcomingTrips;
     private TripAdapter  tripAdapter;
 
+    // Saludo
+    private TextView tvWelcomeGreeting;
+
     // Stats
     private TextView tvStatsTrips, tvStatsFavorites, tvStatsExcursions;
 
@@ -57,6 +60,9 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
 
         // Recycler
         rvUpcomingTrips = view.findViewById(R.id.rvUpcomingTrips);
+
+        // Saludo
+        tvWelcomeGreeting = view.findViewById(R.id.tvWelcomeGreeting);
 
         // Stats
         tvStatsTrips      = view.findViewById(R.id.tvStatsTrips);
@@ -114,8 +120,49 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
         String userId = FirebaseAuthManager.getInstance().getCurrentUserId();
         if (userId == null) return;
 
+        loadGreeting(userId);
         loadTrips(userId);
         loadStats(userId);
+    }
+
+    // ==================== SALUDO PERSONALIZADO ====================
+
+    /**
+     * Pone "Hola, {nombre} 👋" usando el nombre guardado en Firestore.
+     * Si no hay nombre, usa la parte anterior a la @ del email como fallback.
+     */
+    private void loadGreeting(String userId) {
+        if (tvWelcomeGreeting == null) return;
+
+        // Fallback inmediato a partir del email mientras llega Firestore
+        com.google.firebase.auth.FirebaseUser user =
+                FirebaseAuthManager.getInstance().getCurrentUser();
+        if (user != null) {
+            String fallback = user.getDisplayName();
+            if ((fallback == null || fallback.trim().isEmpty()) && user.getEmail() != null) {
+                fallback = user.getEmail().split("@")[0];
+            }
+            if (fallback != null && !fallback.trim().isEmpty()) {
+                tvWelcomeGreeting.setText("Hola, " + firstName(fallback) + " 👋");
+            }
+        }
+
+        FirebaseFirestoreManager.getInstance().getUser(userId)
+                .addOnSuccessListener(doc -> {
+                    if (!isAdded() || tvWelcomeGreeting == null) return;
+                    String name = doc != null ? doc.getString("name") : null;
+                    if (name != null && !name.trim().isEmpty()) {
+                        tvWelcomeGreeting.setText("Hola, " + firstName(name) + " 👋");
+                    }
+                });
+    }
+
+    /** Devuelve solo el primer nombre, con la inicial en mayúscula. */
+    private String firstName(String fullName) {
+        String first = fullName.trim().split("\\s+")[0];
+        if (first.isEmpty()) return first;
+        return Character.toUpperCase(first.charAt(0))
+                + (first.length() > 1 ? first.substring(1) : "");
     }
 
     // ==================== VIAJES ====================
@@ -166,8 +213,8 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
             return;
         }
 
-        // Tomar el primer viaje de la lista como "próximo"
-        Trip next = trips.get(0);
+        // Elegir el viaje cronológicamente más próximo (no el primero arbitrario)
+        Trip next = pickNextTrip(trips);
         nextTripId = next.getId();
 
         cardNextTrip.setVisibility(View.VISIBLE);
@@ -184,15 +231,19 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
         tvNextTripBudget.setText(next.getBudget() != null && next.getBudget() > 0
                 ? next.getBudget().intValue() + "€" : "No definido");
 
-        // Días restantes (placeholder visual — sin parseo de fecha complejo)
-        tvNextTripDays.setText("📅");
+        // Días restantes hasta el inicio del viaje
+        tvNextTripDays.setText(daysRemainingLabel(next.getDates()));
 
         // Imagen
         if (next.getImageUrl() != null && !next.getImageUrl().isEmpty()) {
             Glide.with(this)
                     .load(next.getImageUrl())
+                    .placeholder(R.drawable.bg_image_placeholder)
+                    .error(R.drawable.bg_image_placeholder)
                     .centerCrop()
                     .into(ivNextTripImage);
+        } else {
+            ivNextTripImage.setImageResource(R.drawable.bg_image_placeholder);
         }
 
         // Presupuesto total de todos los viajes
@@ -251,8 +302,30 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
 
     @Override
     public void onDeleteClick(Trip trip) {
-        Toast.makeText(getContext(),
-                "Usa 'Ver todos' para gestionar tus viajes", Toast.LENGTH_SHORT).show();
+        if (trip == null || trip.getId() == null || trip.getId().isEmpty()) {
+            Toast.makeText(getContext(), "No se pudo identificar el viaje", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Borrar viaje")
+                .setMessage("¿Seguro que quieres borrar el viaje a "
+                        + trip.getDestination() + "? Esta acción no se puede deshacer.")
+                .setPositiveButton("Borrar", (d, w) -> deleteTrip(trip))
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void deleteTrip(Trip trip) {
+        FirebaseFirestoreManager.getInstance().deleteTrip(trip.getId())
+                .addOnSuccessListener(v -> {
+                    if (!isAdded()) return;
+                    Toast.makeText(getContext(), "✅ Viaje borrado", Toast.LENGTH_SHORT).show();
+                    loadData(); // recargar viajes, stats y próximo viaje
+                })
+                .addOnFailureListener(e -> {
+                    if (!isAdded()) return;
+                    Toast.makeText(getContext(), "❌ Error al borrar el viaje", Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override
@@ -263,5 +336,61 @@ public class HomeFragment extends Fragment implements TripAdapter.OnTripActionLi
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_homeFragment_to_tripDetailFragment, args);
         }
+    }
+
+    // ==================== UTILIDADES DE FECHA ====================
+
+    private static final java.text.SimpleDateFormat HOME_DATE_FORMAT =
+            new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.US);
+
+    /**
+     * Elige el viaje "próximo": el de fecha de inicio futura más cercana.
+     * Si ninguno tiene fecha futura válida, devuelve el primero de la lista.
+     */
+    private Trip pickNextTrip(List<Trip> trips) {
+        long today = startOfToday();
+        Trip best = null;
+        long bestStart = Long.MAX_VALUE;
+        for (Trip t : trips) {
+            long start = parseStartMillis(t.getDates());
+            if (start >= today && start < bestStart) {
+                bestStart = start;
+                best = t;
+            }
+        }
+        return best != null ? best : trips.get(0);
+    }
+
+    /** Etiqueta legible de días restantes hasta el inicio del viaje. */
+    private String daysRemainingLabel(String dates) {
+        long start = parseStartMillis(dates);
+        if (start < 0) return "📅";
+        long today = startOfToday();
+        long days = (start - today) / (24L * 60 * 60 * 1000);
+        if (days > 1)  return days + " días";
+        if (days == 1) return "Mañana";
+        if (days == 0) return "¡Hoy!";
+        return "En curso";
+    }
+
+    /** Parsea la fecha de inicio ("dd/MM/yyyy - ...") a millis, o -1 si falla. */
+    private long parseStartMillis(String dates) {
+        if (dates == null || dates.trim().isEmpty()) return -1;
+        String startPart = dates.split(" - ")[0].trim();
+        try {
+            java.util.Date d = HOME_DATE_FORMAT.parse(startPart);
+            return d != null ? d.getTime() : -1;
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    private long startOfToday() {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        c.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        c.set(java.util.Calendar.MINUTE, 0);
+        c.set(java.util.Calendar.SECOND, 0);
+        c.set(java.util.Calendar.MILLISECOND, 0);
+        return c.getTimeInMillis();
     }
 }
