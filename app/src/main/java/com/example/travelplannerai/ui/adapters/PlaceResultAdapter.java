@@ -92,17 +92,28 @@ public class PlaceResultAdapter extends RecyclerView.Adapter<PlaceResultAdapter.
             return;
         }
 
-        // Primera vez: limpiar imagen y pedir la foto a Unsplash
-        holder.ivImage.setImageDrawable(null);
+        // Primera vez: poner placeholder y pedir la foto a Unsplash con fallback
+        holder.ivImage.setImageResource(R.drawable.bg_image_placeholder);
 
-        String query = buildImageQuery(place);
-        UnsplashManager.getInstance().searchPhoto(query,
+        // Cadena de términos, de más específico a más genérico, para que casi
+        // siempre haya foto: nombre+categoría → solo categoría → término genérico.
+        String[] queries = buildImageQueries(place);
+        tryLoadImage(holder, place, position, ctx, queries, 0);
+    }
+
+    /** Prueba cada término de búsqueda en orden hasta que uno devuelva foto. */
+    private void tryLoadImage(ViewHolder holder, NominatimManager.Place place, int position,
+                              Context ctx, String[] queries, int index) {
+        if (index >= queries.length) {
+            place.imageUrl = "";   // no se encontró nada: se queda el placeholder
+            return;
+        }
+        UnsplashManager.getInstance().searchPhoto(queries[index],
                 new UnsplashManager.PhotoCallback() {
                     @Override
                     public void onSuccess(String photoUrl) {
                         place.imageUrl = photoUrl;         // cachear en el modelo
                         UI.post(() -> {
-                            // Verificar que la posición no haya cambiado (scroll)
                             if (holder.getAdapterPosition() == position
                                     && isContextValid(ctx)) {
                                 applyImage(holder, photoUrl, ctx);
@@ -112,8 +123,8 @@ public class PlaceResultAdapter extends RecyclerView.Adapter<PlaceResultAdapter.
 
                     @Override
                     public void onError(String error) {
-                        place.imageUrl = "";               // marcar como "buscado sin resultado"
-                        // placeholder ya está puesto, no hay que hacer nada más
+                        // Probar el siguiente término del fallback
+                        tryLoadImage(holder, place, position, ctx, queries, index + 1);
                     }
                 });
     }
@@ -123,8 +134,8 @@ public class PlaceResultAdapter extends RecyclerView.Adapter<PlaceResultAdapter.
         if (!isContextValid(ctx)) return;
 
         if (url == null || url.isEmpty()) {
-            // Sin foto: icono genérico
-            holder.ivImage.setImageResource(android.R.drawable.ic_menu_gallery);
+            // Sin foto: placeholder de marca
+            holder.ivImage.setImageResource(R.drawable.bg_image_placeholder);
             return;
         }
 
@@ -132,26 +143,28 @@ public class PlaceResultAdapter extends RecyclerView.Adapter<PlaceResultAdapter.
                 .load(url)
                 .apply(new RequestOptions()
                         .centerCrop()
-                        .placeholder(android.R.drawable.ic_menu_gallery)
-                        .error(android.R.drawable.ic_menu_gallery))
+                        .placeholder(R.drawable.bg_image_placeholder)
+                        .error(R.drawable.bg_image_placeholder))
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.ivImage);
     }
 
     /**
-     * Construye el término de búsqueda para Unsplash.
-     * Combina el nombre del lugar + la categoría para resultados más relevantes.
-     * Ejemplos: "Louvre Museum museum", "Hotel Regina Louvre hotel", "Playa de Calpe beach"
+     * Construye la cadena de términos de búsqueda para Unsplash, de más específico
+     * a más genérico. Así, si el nombre concreto del lugar no devuelve foto (lo
+     * habitual en Unsplash), se prueba con la categoría y finalmente con un término
+     * genérico, garantizando que casi siempre se muestre una imagen.
      */
-    private String buildImageQuery(NominatimManager.Place place) {
-        StringBuilder q = new StringBuilder();
-        if (place.name != null && !place.name.isEmpty())
-            q.append(place.name);
-        if (place.category != null && !place.category.isEmpty()) {
-            if (q.length() > 0) q.append(" ");
-            q.append(place.category);
-        }
-        return q.length() > 0 ? q.toString() : "travel place";
+    private String[] buildImageQueries(NominatimManager.Place place) {
+        java.util.List<String> qs = new java.util.ArrayList<>();
+        String name = place.name != null ? place.name.trim() : "";
+        String cat  = place.category != null ? place.category.trim() : "";
+
+        if (!name.isEmpty() && !cat.isEmpty()) qs.add(name + " " + cat);
+        if (!name.isEmpty())                   qs.add(name);
+        if (!cat.isEmpty())                    qs.add(cat);          // genérico por categoría
+        qs.add("travel landmark");                                   // último recurso
+        return qs.toArray(new String[0]);
     }
 
     /** Evita crashes de Glide cuando el Fragment ya no está activo. */
