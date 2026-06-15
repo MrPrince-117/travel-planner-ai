@@ -1,15 +1,15 @@
 # 🌍 Smart Travel Planner - TFG Ingeniería Informática
 
-[cite_start]Aplicación móvil nativa para Android que centraliza la planificación de viajes y excursiones mediante el uso de Inteligencia Artificial[cite: 71, 74].
+Aplicación móvil nativa para Android que centraliza la planificación de viajes y excursiones mediante el uso de Inteligencia Artificial.
 
-## 📝 Descripción del Proyecto
-[cite_start]Este proyecto resuelve la fragmentación de información al organizar un viaje (Google Maps, Notas, Calendario, etc.) centralizando toda la experiencia en una única plataforma[cite: 77, 82]. [cite_start]La aplicación permite no solo gestionar la logística básica, sino también recibir recomendaciones inteligentes y generar itinerarios automáticos[cite: 75].
+##  Descripción del Proyecto
+Este proyecto resuelve la fragmentación de información al organizar un viaje (Google Maps, Notas, Calendario, etc.) centralizando toda la experiencia en una única plataforma. La aplicación permite no solo gestionar la logística básica, sino también recibir recomendaciones inteligentes y generar itinerarios automáticos.
 
-## ✨ Características Principales
-* [cite_start]**Gestión de Viajes y Excursiones:** Creación, edición y visualización de viajes con destinos y fechas específicas[cite: 89, 90].
-* [cite_start]**Itinerarios Inteligentes:** Organización de lugares por días con visualización en mapa[cite: 97].
-* [cite_start]**Asistente de IA (OpenAI):** Chatbot que genera itinerarios automáticos y sugiere actividades personalizadas[cite: 98, 99].
-* [cite_start]**Búsqueda de Lugares (Google Places):** Integración para encontrar hoteles, restaurantes y atracciones en tiempo real[cite: 93].
+##  Características Principales
+* **Gestión de Viajes y Excursiones:** Creación, edición y visualización de viajes con destinos y fechas específicas[cite: 89, 90].
+* **Itinerarios Inteligentes:** Organización de lugares por días con visualización en mapa[cite: 97].
+* **Asistente de IA (OpenAI):** Chatbot que genera itinerarios automáticos y sugiere actividades personalizadas[cite: 98, 99].
+* **Búsqueda de Lugares (Google Places):** Integración para encontrar hoteles, restaurantes y atracciones en tiempo real[cite: 93].
 * [cite_start]**Colaboración:** Gestión de participantes con asignación de roles (organizador/participante)[cite: 101].
 * [cite_start]**Favoritos:** Sistema para guardar y reutilizar lugares de interés[cite: 95].
 
